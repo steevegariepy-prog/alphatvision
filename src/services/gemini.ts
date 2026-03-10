@@ -1,28 +1,24 @@
 import { GoogleGenAI } from "@google/genai";
 
 /**
- * Ce service utilise l'IA Gemini directement depuis le client (sans serveur).
- * Il utilise la clé API configurée dans votre environnement.
+ * Ce service utilise l'IA Gemini directement depuis le client.
+ * Il utilise la clé API VITE_GEMINI_API_KEY (ou la clé par défaut de l'environnement).
  */
 
-// Initialisation du client Gemini
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialisation du client Gemini avec la clé spécifiée
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || "";
+const ai = new GoogleGenAI({ apiKey });
 
 /**
- * Analyse une image d'entrée de garage et applique virtuellement un scellant d'asphalte.
- * @param base64Image L'image originale en format Base64
- * @param mimeType Le type MIME de l'image (ex: image/jpeg)
- * @returns L'image traitée en format Base64
+ * Fonction principale demandée pour l'analyse et la modification de l'asphalte.
+ * Note: On utilise gemini-2.5-flash-image pour obtenir un résultat visuel (image).
  */
-export async function applyAsphaltSealant(base64Image: string, mimeType: string): Promise<string> {
+export async function analyzeAsphalt(imageAsBase64: string) {
   try {
-    // Extraction des données pures (sans le préfixe data:image/...)
-    const base64Data = base64Image.split(',')[1] || base64Image;
+    // On utilise le modèle d'image pour réellement "montrer le résultat" comme demandé
+    const model = "gemini-2.5-flash-image";
     
-    // On utilise gemini-2.5-flash-image pour obtenir un résultat visuel (image)
-    const model = 'gemini-2.5-flash-image';
-    
-    // Vos instructions précises pour le scellant (Prompt de Steve)
+    // Vos instructions précises pour le scellant
     const prompt = "Analyse cette entrée de garage et montre le résultat avec un scellant d'asphalte noir neuf et professionnel. Sans fissures et sans trous. Retourne uniquement l'image modifiée.";
 
     const response = await ai.models.generateContent({
@@ -31,19 +27,19 @@ export async function applyAsphaltSealant(base64Image: string, mimeType: string)
         parts: [
           {
             inlineData: {
-              data: base64Data,
-              mimeType: 'image/jpeg',
-            },
+              data: imageAsBase64.split(',')[1] || imageAsBase64,
+              mimeType: "image/jpeg"
+            }
           },
           {
-            text: prompt,
-          },
-        ],
-      },
+            text: prompt
+          }
+        ]
+      }
     });
-
-    // Extraction de l'image générée dans la réponse
-    if (response.candidates && response.candidates[0].content.parts) {
+    
+    // Extraction de l'image générée
+    if (response.candidates?.[0]?.content?.parts) {
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData) {
           return `data:image/png;base64,${part.inlineData.data}`;
@@ -52,16 +48,15 @@ export async function applyAsphaltSealant(base64Image: string, mimeType: string)
     }
 
     throw new Error("L'IA n'a pas retourné d'image modifiée.");
-  } catch (error: any) {
-    console.error("Erreur IA Gemini:", error);
-    
-    if (error.message?.includes("API key")) {
-      throw new Error("Clé API manquante ou invalide. Assurez-vous qu'elle est bien configurée.");
-    }
-    
-    throw new Error("Impossible d'analyser l'image pour le moment. Réessayez plus tard.");
+  } catch (error) {
+    console.error("Erreur Gemini:", error);
+    throw new Error("L'IA n'a pas pu répondre.");
   }
 }
 
-// Alias pour la compatibilité avec d'autres parties du code si nécessaire
-export const analyzeAsphalt = applyAsphaltSealant;
+/**
+ * Alias pour la compatibilité avec le reste de l'application (App.tsx)
+ */
+export async function applyAsphaltSealant(base64Image: string, _mimeType: string): Promise<string> {
+  return analyzeAsphalt(base64Image);
+}
