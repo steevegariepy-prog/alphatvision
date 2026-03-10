@@ -1,79 +1,67 @@
-declare global {
-  interface Window {
-    aistudio?: {
-      hasSelectedApiKey: () => Promise<boolean>;
-      openSelectKey: () => Promise<void>;
-    };
-  }
-}
+import { GoogleGenAI } from "@google/genai";
 
-async function resizeImage(base64Str: string): Promise<string> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = base64Str;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 1200;
-      const MAX_HEIGHT = 1200;
-      let width = img.width;
-      let height = img.height;
+/**
+ * Ce service utilise l'IA Gemini directement depuis le client (sans serveur).
+ * Il utilise la clé API configurée dans votre environnement.
+ */
 
-      if (width > height) {
-        if (width > MAX_WIDTH) {
-          height *= MAX_WIDTH / width;
-          width = MAX_WIDTH;
-        }
-      } else {
-        if (height > MAX_HEIGHT) {
-          width *= MAX_HEIGHT / height;
-          height = MAX_HEIGHT;
-        }
-      }
+// Initialisation du client Gemini
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx?.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
-    };
-  });
-}
-
+/**
+ * Analyse une image d'entrée de garage et applique virtuellement un scellant d'asphalte.
+ * @param base64Image L'image originale en format Base64
+ * @param mimeType Le type MIME de l'image (ex: image/jpeg)
+ * @returns L'image traitée en format Base64
+ */
 export async function applyAsphaltSealant(base64Image: string, mimeType: string): Promise<string> {
   try {
-    const resizedBase64 = await resizeImage(base64Image);
+    // Extraction des données pures (sans le préfixe data:image/...)
+    const base64Data = base64Image.split(',')[1] || base64Image;
     
-    // Try to get key from window.aistudio if available
-    let userApiKey = null;
-    if (window.aistudio && await window.aistudio.hasSelectedApiKey()) {
-      // In some environments, the key is injected into process.env after selection
-      // But we can't access process.env here. The server will check its own process.env.
-    }
+    // On utilise gemini-2.5-flash-image pour obtenir un résultat visuel (image)
+    const model = 'gemini-2.5-flash-image';
+    
+    // Vos instructions précises pour le scellant (Prompt de Steve)
+    const prompt = "Analyse cette entrée de garage et montre le résultat avec un scellant d'asphalte noir neuf et professionnel. Sans fissures et sans trous. Retourne uniquement l'image modifiée.";
 
-    const response = await fetch("/api/process-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              data: base64Data,
+              mimeType: 'image/jpeg',
+            },
+          },
+          {
+            text: prompt,
+          },
+        ],
       },
-      body: JSON.stringify({
-        image: resizedBase64,
-        mimeType: 'image/jpeg',
-        userApiKey: null // The server will use its own env vars
-      }),
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      if (data.needsKeySelection) {
-        throw new Error("AUTH_REQUIRED");
+    // Extraction de l'image générée dans la réponse
+    if (response.candidates && response.candidates[0].content.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
       }
-      throw new Error(data.error || "Erreur serveur.");
     }
 
-    return data.processedImage;
+    throw new Error("L'IA n'a pas retourné d'image modifiée.");
   } catch (error: any) {
-    console.error("Client Error:", error);
-    throw error;
+    console.error("Erreur IA Gemini:", error);
+    
+    if (error.message?.includes("API key")) {
+      throw new Error("Clé API manquante ou invalide. Assurez-vous qu'elle est bien configurée.");
+    }
+    
+    throw new Error("Impossible d'analyser l'image pour le moment. Réessayez plus tard.");
   }
 }
+
+// Alias pour la compatibilité avec d'autres parties du code si nécessaire
+export const analyzeAsphalt = applyAsphaltSealant;
