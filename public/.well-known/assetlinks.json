@@ -1,1 +1,9 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.alphatvision.twa",
+        "sha256_cert_fingerprints": ["A7:8D:DD:B8:04:73:5D:8E:5D:A2:1C:94:6A:C0:F3:CB:F8:4C:C2:EC:A8:4E:D1:2F:90:13:BF:F2:FF:89:97:3B"]
+      }
+    }]
 
