@@ -1,0 +1,7 @@
+{
+  "name": "AsphaltVision",
+  "description": "Visualisez votre entrée de garage avec un scellant d'asphalte frais grâce à l'IA.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

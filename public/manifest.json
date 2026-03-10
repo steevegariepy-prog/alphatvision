@@ -1,0 +1,24 @@
+{
+  "name": "AsphaltVision",
+  "short_name": "AsphaltVision",
+  "description": "Visualisez votre entrée de garage avec un scellant d'asphalte frais grâce à l'IA.",
+  "lang": "fr-CA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#18181b",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/10b981/ffffff.png?text=AV",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://placehold.co/512x512/10b981/ffffff.png?text=AsphaltVision",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
