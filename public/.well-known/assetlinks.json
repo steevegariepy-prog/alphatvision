@@ -3,7 +3,7 @@
       "target": {
         "namespace": "android_app",
         "package_name": "app.vercel.alphatvision.twa",
-        "sha256_cert_fingerprints": ["A7:8D:DD:B8:04:73:5D:8E:5D:A2:1C:94:6A:C0:F3:CB:F8:4C:C2:EC:A8:4E:D1:2F:90:13:BF:F2:FF:89:97:3B"]
+        "sha256_cert_fingerprints": ["FE:6A:A5:1D:EE:C3:59:0E:39:1E:51:E9:DB:F8:35:E6:91:CA:A7:01:D8:4A:8C:4D:8F:FE:65:3D:C0:A7:93:4C"]
       }
     }]
 
