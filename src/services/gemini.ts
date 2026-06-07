@@ -1,9 +1,12 @@
 /**
- * Ce service appelle désormais l'API serveur du backend pour traiter l'image de l'asphalte
- * de manière sécurisée et robuste sans exposer l'API key au navigateur.
+ * Ce service communique avec le serveur Express pour l'analyse et la modification de l'asphalte.
+ * Cela protège la clé API en la gardant côté serveur.
  */
 
-export async function applyAsphaltSealant(base64Image: string, mimeType: string): Promise<string> {
+/**
+ * Fonction principale demandée pour l'analyse et la modification de l'asphalte via l'API du serveur.
+ */
+export async function analyzeAsphalt(imageAsBase64: string, mimeType?: string): Promise<string> {
   try {
     const response = await fetch("/api/process-image", {
       method: "POST",
@@ -11,30 +14,31 @@ export async function applyAsphaltSealant(base64Image: string, mimeType: string)
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        image: base64Image,
+        image: imageAsBase64,
         mimeType: mimeType || "image/jpeg",
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || "Le serveur a retourné une erreur lors du traitement.");
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || `Erreur serveur: ${response.status}`);
     }
 
     const data = await response.json();
     if (data.processedImage) {
       return data.processedImage;
     }
-    throw new Error("Le serveur n'a pas retourné l'image transformée.");
+    throw new Error("L'IA n'a pas retourné de résultat valide.");
   } catch (error: any) {
-    console.error("Erreur d'appel API:", error);
-    throw new Error(error.message || "Impossible de se connecter au serveur de traitement.");
+    console.error("Erreur lors de l'appel API asphalte:", error);
+    throw new Error(error.message || "Désolé, impossible de traiter l'image. Veuillez vérifier la connexion ou la clé API.");
   }
 }
 
 /**
- * Fonction principale demandée pour l'analyse et la modification de l'asphalte (alias/compatibilité).
+ * Alias pour la compatibilité avec le reste de l'application (App.tsx)
  */
-export async function analyzeAsphalt(imageAsBase64: string): Promise<string> {
-  return applyAsphaltSealant(imageAsBase64, "image/jpeg");
+export async function applyAsphaltSealant(base64Image: string, mimeType: string): Promise<string> {
+  return analyzeAsphalt(base64Image, mimeType);
 }
+
