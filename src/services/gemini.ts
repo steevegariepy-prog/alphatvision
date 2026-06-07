@@ -1,44 +1,62 @@
-/**
- * Ce service communique avec le serveur Express pour l'analyse et la modification de l'asphalte.
- * Cela protège la clé API en la gardant côté serveur.
- */
+import { GoogleGenAI } from "@google/genai";
 
 /**
- * Fonction principale demandée pour l'analyse et la modification de l'asphalte via l'API du serveur.
+ * Ce service utilise l'IA Gemini directement depuis le client.
+ * Il utilise la clé API VITE_GEMINI_API_KEY (ou la clé par défaut de l'environnement).
  */
-export async function analyzeAsphalt(imageAsBase64: string, mimeType?: string): Promise<string> {
+
+// Initialisation du client Gemini avec la clé spécifiée
+const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env?.GEMINI_API_KEY : '') || "";
+const ai = new GoogleGenAI({ apiKey });
+
+/**
+ * Fonction principale demandée pour l'analyse et la modification de l'asphalte.
+ * Note: On utilise gemini-2.5-flash-image pour obtenir un résultat visuel (image).
+ */
+export async function analyzeAsphalt(imageAsBase64: string) {
   try {
-    const response = await fetch("/api/process-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        image: imageAsBase64,
-        mimeType: mimeType || "image/jpeg",
-      }),
+    // On utilise le modèle d'image pour réellement "montrer le résultat" comme demandé
+    const model = "gemini-2.5-flash-image";
+    
+    // Vos instructions précises pour le scellant
+    const prompt = "Analyse cette entrée de garage et montre le résultat avec un scellant d'asphalte noir neuf et professionnel. Sans fissures et sans trous. Retourne uniquement l'image modifiée.";
+
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              data: imageAsBase64.split(',')[1] || imageAsBase64,
+              mimeType: "image/jpeg"
+            }
+          },
+          {
+            text: prompt
+          }
+        ]
+      }
     });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error || `Erreur serveur: ${response.status}`);
+    
+    // Extraction de l'image générée
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
+      }
     }
 
-    const data = await response.json();
-    if (data.processedImage) {
-      return data.processedImage;
-    }
-    throw new Error("L'IA n'a pas retourné de résultat valide.");
-  } catch (error: any) {
-    console.error("Erreur lors de l'appel API asphalte:", error);
-    throw new Error(error.message || "Désolé, impossible de traiter l'image. Veuillez vérifier la connexion ou la clé API.");
+    throw new Error("L'IA n'a pas retourné d'image modifiée.");
+  } catch (error) {
+    console.error("Erreur Gemini:", error);
+    throw new Error("L'IA n'a pas pu répondre.");
   }
 }
 
 /**
  * Alias pour la compatibilité avec le reste de l'application (App.tsx)
  */
-export async function applyAsphaltSealant(base64Image: string, mimeType: string): Promise<string> {
-  return analyzeAsphalt(base64Image, mimeType);
+export async function applyAsphaltSealant(base64Image: string, _mimeType: string): Promise<string> {
+  return analyzeAsphalt(base64Image);
 }
-
