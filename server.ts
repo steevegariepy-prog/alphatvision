@@ -87,7 +87,7 @@ async function startServer() {
   });
 
   // 4. Fichiers statiques et Icônes
-  app.use(express.static(path.join(__dirname, "public")));
+  app.use(express.static(path.join(process.cwd(), "public")));
 
   app.get("/robots.txt", (req, res) => {
     res.type("text/plain").send("User-agent: *\nAllow: /");
@@ -171,9 +171,9 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.join(__dirname, "dist")));
+    app.use(express.static(path.join(process.cwd(), "dist")));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(__dirname, "dist", "index.html"));
+      res.sendFile(path.join(process.cwd(), "dist", "index.html"));
     });
   }
 
