@@ -37,13 +37,25 @@ async function startServer() {
         src: "/icon-192.png",
         sizes: "192x192",
         type: "image/png",
-        purpose: "any maskable"
+        purpose: "any"
+      },
+      {
+        src: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable"
       },
       {
         src: "/icon-512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "any maskable"
+        purpose: "any"
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable"
       }
     ],
     screenshots: [
@@ -83,7 +95,17 @@ async function startServer() {
 
   app.get("/sw.js", (req, res) => {
     res.setHeader("Content-Type", "application/javascript");
-    res.send("self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });");
+    res.send(`
+      self.addEventListener('install', (event) => {
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', (event) => {
+        event.waitUntil(self.clients.claim());
+      });
+      self.addEventListener('fetch', (event) => {
+        event.respondWith(fetch(event.request));
+      });
+    `);
   });
 
   app.use(express.json({ limit: '50mb' }));
