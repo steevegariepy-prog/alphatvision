@@ -28,6 +28,7 @@ async function startServer() {
     description: "Visualisez votre entrée de garage avec un scellant d'asphalte frais grâce à l'IA.",
     lang: "fr-CA",
     start_url: "/",
+    scope: "/",
     id: "/",
     display: "standalone",
     background_color: "#18181b",
@@ -59,12 +60,25 @@ async function startServer() {
       }
     ],
     screenshots: [
-      { src: "/icon-512.png", sizes: "512x512", type: "image/png", form_factor: "narrow" }
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        form_factor: "narrow",
+        label: "AsphaltVision Mobile"
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        form_factor: "wide",
+        label: "AsphaltVision Desktop"
+      }
     ]
   };
 
   app.get(["/manifest.json", "/manifest.webmanifest"], (req, res) => {
-    res.setHeader("Content-Type", "application/manifest+json");
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache");
     res.status(200).json(manifest);
   });
@@ -96,14 +110,46 @@ async function startServer() {
   app.get("/sw.js", (req, res) => {
     res.setHeader("Content-Type", "application/javascript");
     res.send(`
+      const CACHE_NAME = 'asphalt-vision-v2';
+
       self.addEventListener('install', (event) => {
         self.skipWaiting();
       });
+
       self.addEventListener('activate', (event) => {
-        event.waitUntil(self.clients.claim());
+        event.waitUntil(
+          caches.keys().then((cacheNames) => {
+            return Promise.all(
+              cacheNames.map((cache) => {
+                if (cache !== CACHE_NAME) {
+                  return caches.delete(cache);
+                }
+              })
+            );
+          }).then(() => self.clients.claim())
+        );
       });
+
       self.addEventListener('fetch', (event) => {
-        event.respondWith(fetch(event.request));
+        if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+          return;
+        }
+
+        event.respondWith(
+          caches.match(event.request).then((cachedResponse) => {
+            const fetchPromise = fetch(event.request).then((networkResponse) => {
+              if (networkResponse && networkResponse.status === 200) {
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(event.request, responseToCache);
+                });
+              }
+              return networkResponse;
+            }).catch(() => {});
+
+            return cachedResponse || fetchPromise;
+          })
+        );
       });
     `);
   });
