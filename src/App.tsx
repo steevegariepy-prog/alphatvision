@@ -5,7 +5,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages } from 'lucide-react';
+import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, GripVertical } from 'lucide-react';
 import { ImageUploader } from './components/ImageUploader';
 import { ComparisonView } from './components/ComparisonView';
 import { applyAsphaltSealant } from './services/gemini';
@@ -46,7 +46,11 @@ const translations = {
     legalTerms: "Conditions d'utilisation",
     footerPassion: "Fait avec passion pour l'asphalte",
     footerRights: "Tous droits réservés.",
-    langSwitch: "English"
+    langSwitch: "English",
+    exampleTitle: "Exemple de Résultat Réaliste",
+    exampleSubtitle: "Découvrez la différence saisissante avant et après l'application de notre scellant de qualité supérieure.",
+    statusBefore: "État Actuel",
+    statusAfter: "Simulation Pro"
   },
   en: {
     appName: "Asphalt",
@@ -83,7 +87,11 @@ const translations = {
     legalTerms: "Terms of Use",
     footerPassion: "Made with passion for asphalt",
     footerRights: "All rights reserved.",
-    langSwitch: "Français"
+    langSwitch: "Français",
+    exampleTitle: "Realistic Result Example",
+    exampleSubtitle: "Discover the striking difference before and after applying our high-quality sealant.",
+    statusBefore: "Current State",
+    statusAfter: "Pro Simulation"
   }
 };
 
@@ -260,6 +268,66 @@ export default function App() {
                   title={t.feature3Title} 
                   description={t.feature3Desc}
                 />
+              </div>
+
+              {/* Showcase de comparaison d'exemple */}
+              <div className="pt-16 max-w-4xl mx-auto space-y-8">
+                <div className="text-center space-y-3">
+                  <div className="inline-flex items-center space-x-2 bg-emerald-400/10 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
+                    <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Aperçu de la transformation</span>
+                  </div>
+                  <h2 className="text-3xl font-bold font-display text-white">{t.exampleTitle}</h2>
+                  <p className="text-zinc-400 max-w-lg mx-auto leading-relaxed text-sm">
+                    {t.exampleSubtitle}
+                  </p>
+                </div>
+
+                {/* Container de l'image de comparaison avec un magnifique cadrage soigné et effet relief */}
+                <motion.div 
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="relative rounded-[2.5rem] overflow-hidden border-[12px] border-zinc-800/80 bg-zinc-950 shadow-[0_30px_100px_rgba(0,0,0,0.5)] aspect-[4/3] md:aspect-[16/10] group cursor-default"
+                >
+                  <img 
+                    src="/driveway_comparison.png" 
+                    alt="Exemple de simulation scellant d'asphalte"
+                    className="w-full h-full object-cover select-none"
+                    referrerPolicy="no-referrer"
+                  />
+
+                  {/* Overlays d'état reproduisant avec précision le design de l'image de référence */}
+                  <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 md:p-8">
+                    <div className="flex justify-between items-start w-full">
+                      {/* Badge Gauche: État Actuel */}
+                      <div className="bg-zinc-900/90 backdrop-blur-md border border-white/10 text-zinc-100 font-display font-medium uppercase tracking-widest text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg">
+                        {t.statusBefore}
+                      </div>
+
+                      {/* Badge Droite: Simulation Pro */}
+                      <div className="bg-emerald-600/95 backdrop-blur-md border border-emerald-400/20 text-white font-display font-medium uppercase tracking-widest text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg">
+                        {t.statusAfter}
+                      </div>
+                    </div>
+
+                    <div className="w-full text-center">
+                      <span className="inline-block bg-black/60 backdrop-blur-md text-zinc-300 text-xs px-5 py-2.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        Téléchargez votre photo en haut pour simuler en direct !
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Barre de séparation verticale centrale avec poignée stylisée */}
+                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-b from-white/20 via-white/80 to-white/20 flex items-center justify-center pointer-events-none">
+                    <div className="w-10 h-24 bg-emerald-500 rounded-full shadow-[0_0_25px_rgba(16,185,129,0.7)] border-4 border-white flex flex-col items-center justify-center space-y-1.5">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
+                      <div className="w-5 h-8 rounded-full border border-white/30 flex items-center justify-center">
+                        <GripVertical className="w-4 h-4 text-white shrink-0" />
+                      </div>
+                      <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
+                    </div>
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
           )}
