@@ -347,7 +347,7 @@ export default function App() {
       {/* Footer */}
       <footer className="py-16 px-6 border-t border-white/10 bg-zinc-900/80 backdrop-blur-xl relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <div className="col-span-1 md:col-span-2 space-y-6">
               <div className="flex flex-col">
                 <div className="flex items-center space-x-2">
@@ -363,14 +363,6 @@ export default function App() {
               <p className="text-zinc-400 max-w-sm leading-relaxed">
                 {t.footerDesc}
               </p>
-            </div>
-            <div>
-              <h4 className="font-bold font-display mb-4 text-white">Navigation</h4>
-              <ul className="space-y-2 text-sm text-zinc-400">
-                <li><a href="#" className="hover:text-emerald-400 transition-colors">{t.navHome}</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition-colors">{t.navHow}</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition-colors">{t.navPricing}</a></li>
-              </ul>
             </div>
             <div>
               <h4 className="font-bold font-display mb-4 text-white">Légal</h4>
