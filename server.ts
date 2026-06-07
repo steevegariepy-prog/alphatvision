@@ -29,16 +29,25 @@ async function startServer() {
     lang: "fr-CA",
     start_url: "/",
     id: "/",
-    display: "fullscreen",
+    display: "standalone",
     background_color: "#18181b",
     theme_color: "#18181b",
     icons: [
-      { src: "/icon.svg", sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any" },
-      { src: "/icon.svg", sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
-      { src: "/icon.svg", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+      {
+        src: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any maskable"
+      },
+      {
+        src: "/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any maskable"
+      }
     ],
     screenshots: [
-      { src: "/icon.svg", sizes: "512x512", type: "image/svg+xml", form_factor: "narrow" }
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png", form_factor: "narrow" }
     ]
   };
 

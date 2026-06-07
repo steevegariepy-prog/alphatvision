@@ -5,9 +5,10 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, GripVertical } from 'lucide-react';
+import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, GripVertical, X } from 'lucide-react';
 import { ImageUploader } from './components/ImageUploader';
 import { ComparisonView } from './components/ComparisonView';
+import { LegalModal, LegalDocumentType } from './components/LegalModal';
 import { applyAsphaltSealant } from './services/gemini';
 
 const translations = {
@@ -44,6 +45,7 @@ const translations = {
     navPricing: "Tarifs",
     legalPrivacy: "Confidentialité",
     legalTerms: "Conditions d'utilisation",
+    legalDisclaimer: "Clause d'exclusion de garantie et de résultats",
     footerPassion: "Fait avec passion pour l'asphalte",
     footerRights: "Tous droits réservés.",
     langSwitch: "English",
@@ -85,6 +87,7 @@ const translations = {
     navPricing: "Pricing",
     legalPrivacy: "Privacy Policy",
     legalTerms: "Terms of Use",
+    legalDisclaimer: "Disclaimer",
     footerPassion: "Made with passion for asphalt",
     footerRights: "All rights reserved.",
     langSwitch: "Français",
@@ -118,6 +121,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [activeLegalModal, setActiveLegalModal] = useState<LegalDocumentType>(null);
 
   const loadingMessages = t.loadingSteps;
 
@@ -435,8 +439,9 @@ export default function App() {
             <div>
               <h4 className="font-bold font-display mb-4 text-white">Légal</h4>
               <ul className="space-y-2 text-sm text-zinc-400">
-                <li><a href="#" className="hover:text-emerald-400 transition-colors">{t.legalPrivacy}</a></li>
-                <li><a href="#" className="hover:text-emerald-400 transition-colors">{t.legalTerms}</a></li>
+                <li><button onClick={() => setActiveLegalModal('privacy')} className="hover:text-emerald-400 transition-colors text-left">{t.legalPrivacy}</button></li>
+                <li><button onClick={() => setActiveLegalModal('terms')} className="hover:text-emerald-400 transition-colors text-left">{t.legalTerms}</button></li>
+                <li><button onClick={() => setActiveLegalModal('disclaimer')} className="hover:text-emerald-400 transition-colors text-left">{t.legalDisclaimer}</button></li>
               </ul>
             </div>
           </div>
@@ -448,6 +453,12 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      <LegalModal 
+        type={activeLegalModal} 
+        onClose={() => setActiveLegalModal(null)} 
+        lang={lang} 
+      />
     </div>
   );
 }
