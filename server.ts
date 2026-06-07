@@ -172,7 +172,14 @@ async function startServer() {
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const ai = new GoogleGenAI({ 
+        apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          }
+        }
+      });
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image', // Default image model
         contents: {
