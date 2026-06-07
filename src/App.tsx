@@ -5,11 +5,29 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, GripVertical, X } from 'lucide-react';
+import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, GripVertical, X, Lock, Crown } from 'lucide-react';
 import { ImageUploader } from './components/ImageUploader';
 import { ComparisonView } from './components/ComparisonView';
 import { LegalModal, LegalDocumentType } from './components/LegalModal';
 import { applyAsphaltSealant } from './services/gemini';
+
+const MAX_FREE_USES = 3;
+const STORAGE_KEY = 'av_uses';
+
+function getUseCount(): number {
+  return parseInt(localStorage.getItem(STORAGE_KEY) || '0');
+}
+function incrementUseCount(): number {
+  const next = getUseCount() + 1;
+  localStorage.setItem(STORAGE_KEY, String(next));
+  return next;
+}
+function canUse(): boolean {
+  return getUseCount() < MAX_FREE_USES;
+}
+function remainingUses(): number {
+  return Math.max(0, MAX_FREE_USES - getUseCount());
+}
 
 const translations = {
   fr: {
@@ -52,7 +70,16 @@ const translations = {
     exampleTitle: "Exemple de Résultat Réaliste",
     exampleSubtitle: "Découvrez la différence saisissante avant et après l'application de notre scellant de qualité supérieure.",
     statusBefore: "État Actuel",
-    statusAfter: "Simulation Pro"
+    statusAfter: "Simulation Pro",
+    freeRemaining: (n: number) => `${n} essai${n > 1 ? 's' : ''} gratuit${n > 1 ? 's' : ''} restant${n > 1 ? 's' : ''}`,
+    paywallTitle: "Vous avez utilisé vos 3 essais gratuits",
+    paywallSubtitle: "Passez à la version Pro pour des simulations illimitées.",
+    paywallFeature1: "Simulations illimitées",
+    paywallFeature2: "Résultats haute résolution",
+    paywallFeature3: "Support prioritaire",
+    paywallCta: "Obtenir la version Pro",
+    paywallPrice: "9,99$ / mois",
+    paywallClose: "Fermer",
   },
   en: {
     appName: "Asphalt",
@@ -94,7 +121,16 @@ const translations = {
     exampleTitle: "Realistic Result Example",
     exampleSubtitle: "Discover the striking difference before and after applying our high-quality sealant.",
     statusBefore: "Current State",
-    statusAfter: "Pro Simulation"
+    statusAfter: "Pro Simulation",
+    freeRemaining: (n: number) => `${n} free trial${n > 1 ? 's' : ''} remaining`,
+    paywallTitle: "You've used your 3 free trials",
+    paywallSubtitle: "Upgrade to Pro for unlimited simulations.",
+    paywallFeature1: "Unlimited simulations",
+    paywallFeature2: "High-resolution results",
+    paywallFeature3: "Priority support",
+    paywallCta: "Get Pro Version",
+    paywallPrice: "$9.99 / month",
+    paywallClose: "Close",
   }
 };
 
@@ -111,6 +147,67 @@ const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: str
   </motion.div>
 );
 
+function PaywallModal({ t, onClose }: { t: typeof translations['fr'], onClose: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="bg-zinc-900 border border-white/10 rounded-[2rem] p-8 max-w-md w-full shadow-2xl relative"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-zinc-500 hover:text-white transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="text-center space-y-6">
+          <div className="w-16 h-16 bg-emerald-600/20 rounded-full flex items-center justify-center mx-auto">
+            <Crown className="w-8 h-8 text-emerald-400" />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold font-display text-white">{t.paywallTitle}</h2>
+            <p className="text-zinc-400">{t.paywallSubtitle}</p>
+          </div>
+
+          <div className="space-y-3 text-left">
+            {[t.paywallFeature1, t.paywallFeature2, t.paywallFeature3].map((f, i) => (
+              <div key={i} className="flex items-center space-x-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <span className="text-zinc-200">{f}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => window.open('https://buy.stripe.com/cNi00idtsdjA7sVaqT28800', '_blank')}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-2"
+            >
+              <Crown className="w-5 h-5" />
+              <span>{t.paywallCta} — {t.paywallPrice}</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="w-full text-zinc-500 hover:text-zinc-300 text-sm transition-colors py-2"
+            >
+              {t.paywallClose}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function App() {
   const [lang, setLang] = useState<'fr' | 'en'>('fr');
   const t = translations[lang];
@@ -122,6 +219,8 @@ export default function App() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [progress, setProgress] = useState(0);
   const [activeLegalModal, setActiveLegalModal] = useState<LegalDocumentType>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [usesLeft, setUsesLeft] = useState(remainingUses());
 
   const loadingMessages = t.loadingSteps;
 
@@ -137,6 +236,12 @@ export default function App() {
   }, [isLoading, loadingMessages.length]);
 
   const processImage = useCallback(async (file: File) => {
+    // Vérifier les essais disponibles
+    if (!canUse()) {
+      setShowPaywall(true);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setLoadingStep(0);
@@ -158,6 +263,10 @@ export default function App() {
       const result = await applyAsphaltSealant(base64, file.type);
       setProcessedImage(result);
       setProgress(100);
+
+      // Incrémenter seulement si succès
+      incrementUseCount();
+      setUsesLeft(remainingUses());
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Désolé, une erreur est survenue lors du traitement de l'image. Veuillez réessayer.");
@@ -201,13 +310,31 @@ export default function App() {
             </span>
           </div>
 
-          <button 
-            onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-            className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-2xl border border-white/10 transition-all text-sm font-medium"
-          >
-            <Languages className="w-4 h-4 text-emerald-400" />
-            <span>{t.langSwitch}</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Badge essais restants */}
+            {usesLeft > 0 && (
+              <div className="hidden sm:flex items-center space-x-1.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-medium">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{t.freeRemaining(usesLeft)}</span>
+              </div>
+            )}
+            {usesLeft === 0 && (
+              <button
+                onClick={() => setShowPaywall(true)}
+                className="hidden sm:flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-2xl text-xs font-bold transition-all"
+              >
+                <Crown className="w-3.5 h-3.5" />
+                <span>Pro</span>
+              </button>
+            )}
+            <button 
+              onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
+              className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-2xl border border-white/10 transition-all text-sm font-medium"
+            >
+              <Languages className="w-4 h-4 text-emerald-400" />
+              <span>{t.langSwitch}</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -249,29 +376,55 @@ export default function App() {
                 <p className="text-xl text-zinc-300 max-w-2xl mx-auto leading-relaxed">
                   {t.heroSubtitle}
                 </p>
+
+                {/* Badge mobile essais restants */}
+                <div className="sm:hidden">
+                  {usesLeft > 0 ? (
+                    <div className="inline-flex items-center space-x-1.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-medium">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{t.freeRemaining(usesLeft)}</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowPaywall(true)}
+                      className="inline-flex items-center space-x-1.5 bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold"
+                    >
+                      <Crown className="w-4 h-4" />
+                      <span>{t.paywallCta}</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="relative">
                 <div className="absolute -inset-4 bg-emerald-500/10 blur-3xl rounded-full -z-10" />
-                <ImageUploader onImageSelect={processImage} isLoading={isLoading} />
+                {usesLeft === 0 ? (
+                  <div
+                    onClick={() => setShowPaywall(true)}
+                    className="relative cursor-pointer"
+                  >
+                    <div className="pointer-events-none opacity-50">
+                      <ImageUploader onImageSelect={processImage} isLoading={isLoading} />
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/60 rounded-3xl backdrop-blur-sm">
+                      <div className="text-center space-y-3">
+                        <Lock className="w-10 h-10 text-emerald-400 mx-auto" />
+                        <p className="text-white font-bold">{t.paywallTitle}</p>
+                        <button className="bg-emerald-600 text-white px-6 py-2 rounded-2xl font-bold text-sm">
+                          {t.paywallCta}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <ImageUploader onImageSelect={processImage} isLoading={isLoading} />
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
-                <FeatureCard 
-                  icon={Zap} 
-                  title={t.feature1Title} 
-                  description={t.feature1Desc}
-                />
-                <FeatureCard 
-                  icon={ShieldCheck} 
-                  title={t.feature2Title} 
-                  description={t.feature2Desc}
-                />
-                <FeatureCard 
-                  icon={CheckCircle2} 
-                  title={t.feature3Title} 
-                  description={t.feature3Desc}
-                />
+                <FeatureCard icon={Zap} title={t.feature1Title} description={t.feature1Desc} />
+                <FeatureCard icon={ShieldCheck} title={t.feature2Title} description={t.feature2Desc} />
+                <FeatureCard icon={CheckCircle2} title={t.feature3Title} description={t.feature3Desc} />
               </div>
 
               {/* Showcase de comparaison d'exemple */}
@@ -282,12 +435,9 @@ export default function App() {
                     <span>Aperçu de la transformation</span>
                   </div>
                   <h2 className="text-3xl font-bold font-display text-white">{t.exampleTitle}</h2>
-                  <p className="text-zinc-400 max-w-lg mx-auto leading-relaxed text-sm">
-                    {t.exampleSubtitle}
-                  </p>
+                  <p className="text-zinc-400 max-w-lg mx-auto leading-relaxed text-sm">{t.exampleSubtitle}</p>
                 </div>
 
-                {/* Container de l'image de comparaison avec un magnifique cadrage soigné et effet relief */}
                 <motion.div 
                   whileHover={{ scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -299,29 +449,21 @@ export default function App() {
                     className="w-full h-full object-cover select-none"
                     referrerPolicy="no-referrer"
                   />
-
-                  {/* Overlays d'état reproduisant avec précision le design de l'image de référence */}
                   <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 md:p-8">
                     <div className="flex justify-between items-start w-full">
-                      {/* Badge Gauche: État Actuel */}
                       <div className="bg-zinc-900/90 backdrop-blur-md border border-white/10 text-zinc-100 font-display font-medium uppercase tracking-widest text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg">
                         {t.statusBefore}
                       </div>
-
-                      {/* Badge Droite: Simulation Pro */}
                       <div className="bg-emerald-600/95 backdrop-blur-md border border-emerald-400/20 text-white font-display font-medium uppercase tracking-widest text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg">
                         {t.statusAfter}
                       </div>
                     </div>
-
                     <div className="w-full text-center">
                       <span className="inline-block bg-black/60 backdrop-blur-md text-zinc-300 text-xs px-5 py-2.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Téléchargez votre photo en haut pour simuler en direct !
                       </span>
                     </div>
                   </div>
-
-                  {/* Barre de séparation verticale centrale avec poignée stylisée */}
                   <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-b from-white/20 via-white/80 to-white/20 flex items-center justify-center pointer-events-none">
                     <div className="w-10 h-24 bg-emerald-500 rounded-full shadow-[0_0_25px_rgba(16,185,129,0.7)] border-4 border-white flex flex-col items-center justify-center space-y-1.5">
                       <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
@@ -335,7 +477,6 @@ export default function App() {
               </div>
             </motion.div>
           )}
-
 
           {isLoading && (
             <motion.div
@@ -351,13 +492,11 @@ export default function App() {
                   <Droplets className="w-10 h-10 text-emerald-400" />
                 </div>
               </div>
-              
               <div className="text-center space-y-6 w-full max-w-md">
                 <div className="space-y-2">
                   <h3 className="text-2xl font-bold font-display text-white">{loadingMessages[loadingStep]}</h3>
                   <p className="text-zinc-400">{t.loadingSub}</p>
                 </div>
-                
                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                   <motion.div 
                     className="h-full bg-emerald-400"
@@ -380,6 +519,12 @@ export default function App() {
               <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold font-display text-white">{t.resultTitle}</h2>
                 <p className="text-zinc-300 text-lg">{t.resultSubtitle}</p>
+                {usesLeft > 0 && (
+                  <div className="inline-flex items-center space-x-1.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-medium">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{t.freeRemaining(usesLeft)}</span>
+                  </div>
+                )}
               </div>
               <ComparisonView 
                 original={originalImage} 
@@ -432,9 +577,7 @@ export default function App() {
                   {t.designedBy}
                 </span>
               </div>
-              <p className="text-zinc-400 max-w-sm leading-relaxed">
-                {t.footerDesc}
-              </p>
+              <p className="text-zinc-400 max-w-sm leading-relaxed">{t.footerDesc}</p>
             </div>
             <div>
               <h4 className="font-bold font-display mb-4 text-white">Légal</h4>
@@ -459,6 +602,13 @@ export default function App() {
         onClose={() => setActiveLegalModal(null)} 
         lang={lang} 
       />
+
+      {/* Paywall Modal */}
+      <AnimatePresence>
+        {showPaywall && (
+          <PaywallModal t={t} onClose={() => setShowPaywall(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
