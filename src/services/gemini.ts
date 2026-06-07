@@ -1,62 +1,40 @@
-import { GoogleGenAI } from "@google/genai";
-
 /**
- * Ce service utilise l'IA Gemini directement depuis le client.
- * Il utilise la clé API VITE_GEMINI_API_KEY (ou la clé par défaut de l'environnement).
+ * Ce service appelle désormais l'API serveur du backend pour traiter l'image de l'asphalte
+ * de manière sécurisée et robuste sans exposer l'API key au navigateur.
  */
 
-// Initialisation du client Gemini avec la clé spécifiée
-const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env?.GEMINI_API_KEY : '') || "";
-const ai = new GoogleGenAI({ apiKey });
-
-/**
- * Fonction principale demandée pour l'analyse et la modification de l'asphalte.
- * Note: On utilise gemini-2.5-flash-image pour obtenir un résultat visuel (image).
- */
-export async function analyzeAsphalt(imageAsBase64: string) {
+export async function applyAsphaltSealant(base64Image: string, mimeType: string): Promise<string> {
   try {
-    // On utilise le modèle d'image pour réellement "montrer le résultat" comme demandé
-    const model = "gemini-2.5-flash-image";
-    
-    // Vos instructions précises pour le scellant
-    const prompt = "Analyse cette entrée de garage et montre le résultat avec un scellant d'asphalte noir neuf et professionnel. Sans fissures et sans trous. Retourne uniquement l'image modifiée.";
-
-    const response = await ai.models.generateContent({
-      model: model,
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              data: imageAsBase64.split(',')[1] || imageAsBase64,
-              mimeType: "image/jpeg"
-            }
-          },
-          {
-            text: prompt
-          }
-        ]
-      }
+    const response = await fetch("/api/process-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        image: base64Image,
+        mimeType: mimeType || "image/jpeg",
+      }),
     });
-    
-    // Extraction de l'image générée
-    if (response.candidates?.[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          return `data:image/png;base64,${part.inlineData.data}`;
-        }
-      }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || "Le serveur a retourné une erreur lors du traitement.");
     }
 
-    throw new Error("L'IA n'a pas retourné d'image modifiée.");
-  } catch (error) {
-    console.error("Erreur Gemini:", error);
-    throw new Error("L'IA n'a pas pu répondre.");
+    const data = await response.json();
+    if (data.processedImage) {
+      return data.processedImage;
+    }
+    throw new Error("Le serveur n'a pas retourné l'image transformée.");
+  } catch (error: any) {
+    console.error("Erreur d'appel API:", error);
+    throw new Error(error.message || "Impossible de se connecter au serveur de traitement.");
   }
 }
 
 /**
- * Alias pour la compatibilité avec le reste de l'application (App.tsx)
+ * Fonction principale demandée pour l'analyse et la modification de l'asphalte (alias/compatibilité).
  */
-export async function applyAsphaltSealant(base64Image: string, _mimeType: string): Promise<string> {
-  return analyzeAsphalt(base64Image);
+export async function analyzeAsphalt(imageAsBase64: string): Promise<string> {
+  return applyAsphaltSealant(imageAsBase64, "image/jpeg");
 }
