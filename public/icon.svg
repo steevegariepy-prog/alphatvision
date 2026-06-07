@@ -1,23 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    <!-- Gold Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fef08a;stop-opacity:1" /> <!-- Bright gold/yellow -->
+      <stop offset="30%" style="stop-color:#eab308;stop-opacity:1" /> <!-- Mid gold -->
+      <stop offset="70%" style="stop-color:#b45309;stop-opacity:1" /> <!-- Dark gold/bronze -->
+      <stop offset="100%" style="stop-color:#eab308;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Dark Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#27272a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#09090b;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Outer Ring Gradient -->
+    <linearGradient id="ringGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#52525b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#18181b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3f3f46;stop-opacity:1" />
     </linearGradient>
   </defs>
-  <!-- Background with Slate charcoal/zinc color matching the app -->
-  <rect width="512" height="512" rx="120" fill="#18181b" stroke="#ffffff" stroke-opacity="0.1" stroke-width="4" />
+
+  <!-- Outer Ring Background -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGrad)" stroke="url(#ringGrad)" stroke-width="16" />
   
-  <!-- Droplet / Vision Emblem -->
-  <g transform="translate(144, 112)">
-    <!-- Outer glow -->
-    <path d="M112,20 C112,20 224,150 224,224 C224,286 174,336 112,336 C50,336 0,286 0,224 C0,150 112,20 112,20 Z" fill="url(#primaryGrad)" opacity="0.15" transform="scale(1.1) translate(-10, -15)" />
+  <!-- Inner Gold Ring -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="url(#goldGrad)" stroke-width="6" opacity="0.8" />
+
+  <!-- Stylized "A" with Road & Arrow Concept -->
+  <g transform="translate(0, -30)">
+    <!-- Left leg of A -->
+    <path d="M256,120 L130,340 L180,340 L256,200 Z" fill="url(#goldGrad)" />
+    <!-- Right leg / Arrow of A -->
+    <path d="M230,240 L310,130 L360,130 L350,180 L280,270 L340,340 L280,340 L240,280 Z" fill="url(#goldGrad)" />
+    <!-- Crossbar of A represented as a curved road -->
+    <path d="M160,280 Q256,220 310,240 L330,290 Q256,270 180,320 Z" fill="url(#goldGrad)" opacity="0.9" />
     
-    <!-- Core Droplet -->
-    <path d="M112,20 C112,20 224,150 224,224 C224,286 174,336 112,336 C50,336 0,286 0,224 C0,150 112,20 112,20 Z" fill="url(#primaryGrad)" />
-    
-    <!-- Sparkle/Vision overlay -->
-    <path d="M112,70 L123,115 L168,126 L123,137 L112,182 L101,137 L56,126 L101,115 Z" fill="#ffffff" />
-    <circle cx="112" cy="240" r="16" fill="#ffffff" opacity="0.8" />
+    <!-- Arrowtip -->
+    <polygon points="360,130 310,130 350,180" fill="#fef08a" />
+  </g>
+
+  <!-- Text ASPHALT VISION -->
+  <g text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-weight="900">
+    <text x="256" y="380" font-size="64" fill="url(#goldGrad)" letter-spacing="2">ASPHALT</text>
+    <text x="256" y="440" font-size="52" fill="url(#goldGrad)" letter-spacing="4">VISION</text>
   </g>
 </svg>
+
