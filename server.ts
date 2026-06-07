@@ -29,7 +29,7 @@ async function startServer() {
     lang: "fr-CA",
     start_url: "/",
     id: "/",
-    display: "standalone",
+    display: "fullscreen",
     background_color: "#18181b",
     theme_color: "#18181b",
     icons: [
