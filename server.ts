@@ -4,8 +4,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenAI } from "@google/genai";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Safe path resolution for both ES Module (dev) and CommonJS (prod)
+let currentDirname = "";
+try {
+  currentDirname = path.dirname(fileURLToPath(import.meta.url));
+} catch {
+  currentDirname = typeof __dirname !== "undefined" ? __dirname : process.cwd();
+}
 
 async function startServer() {
   const app = express();
@@ -66,7 +71,7 @@ async function startServer() {
   });
 
   // 4. Fichiers statiques et Icônes
-  app.use(express.static(path.join(__dirname, "public")));
+  app.use(express.static(path.join(currentDirname, "public")));
 
   // 3. Icônes Locales (Indispensable pour le packaging Android)
   app.get("/icon-192.png", async (req, res) => {
