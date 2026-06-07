@@ -77,29 +77,6 @@ async function startServer() {
   // 4. Fichiers statiques et Icônes
   app.use(express.static(path.join(__dirname, "public")));
 
-  // 3. Icônes Locales (Indispensable pour le packaging Android)
-  app.get("/icon-192.png", async (req, res) => {
-    try {
-      const response = await fetch("https://placehold.co/192x192/10b981/ffffff.png?text=AV");
-      const buffer = await response.arrayBuffer();
-      res.setHeader("Content-Type", "image/png");
-      res.send(Buffer.from(buffer));
-    } catch (e) {
-      res.status(404).end();
-    }
-  });
-
-  app.get("/icon-512.png", async (req, res) => {
-    try {
-      const response = await fetch("https://placehold.co/512x512/10b981/ffffff.png?text=AsphaltVision");
-      const buffer = await response.arrayBuffer();
-      res.setHeader("Content-Type", "image/png");
-      res.send(Buffer.from(buffer));
-    } catch (e) {
-      res.status(404).end();
-    }
-  });
-
   app.get("/robots.txt", (req, res) => {
     res.type("text/plain").send("User-agent: *\nAllow: /");
   });
