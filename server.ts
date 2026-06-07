@@ -4,8 +4,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { GoogleGenAI } from "@google/genai";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Safe path resolution for both ES Module (dev) and CommonJS (prod)
+let currentDirname = "";
+try {
+  currentDirname = path.dirname(fileURLToPath(import.meta.url));
+} catch {
+  currentDirname = typeof __dirname !== "undefined" ? __dirname : process.cwd();
+}
 
 async function startServer() {
   const app = express();
@@ -28,57 +33,22 @@ async function startServer() {
     description: "Visualisez votre entrée de garage avec un scellant d'asphalte frais grâce à l'IA.",
     lang: "fr-CA",
     start_url: "/",
-    scope: "/",
     id: "/",
-    display: "standalone",
+    display: "fullscreen",
     background_color: "#18181b",
     theme_color: "#18181b",
     icons: [
-      {
-        src: "/icon-192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "any"
-      },
-      {
-        src: "/icon-192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable"
-      },
-      {
-        src: "/icon-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "any"
-      },
-      {
-        src: "/icon-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable"
-      }
+      { src: "/icon.svg", sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any" },
+      { src: "/icon.svg", sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
+      { src: "/icon.svg", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
     ],
     screenshots: [
-      {
-        src: "/icon-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        form_factor: "narrow",
-        label: "AsphaltVision Mobile"
-      },
-      {
-        src: "/icon-512.png",
-        sizes: "512x512",
-        type: "image/png",
-        form_factor: "wide",
-        label: "AsphaltVision Desktop"
-      }
+      { src: "/icon.svg", sizes: "512x512", type: "image/svg+xml", form_factor: "narrow" }
     ]
   };
 
   app.get(["/manifest.json", "/manifest.webmanifest"], (req, res) => {
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Content-Type", "application/manifest+json");
     res.setHeader("Cache-Control", "no-cache");
     res.status(200).json(manifest);
   });
@@ -101,7 +71,30 @@ async function startServer() {
   });
 
   // 4. Fichiers statiques et Icônes
-  app.use(express.static(path.join(process.cwd(), "public")));
+  app.use(express.static(path.join(currentDirname, "public")));
+
+  // 3. Icônes Locales (Indispensable pour le packaging Android)
+  app.get("/icon-192.png", async (req, res) => {
+    try {
+      const response = await fetch("https://placehold.co/192x192/10b981/ffffff.png?text=AV");
+      const buffer = await response.arrayBuffer();
+      res.setHeader("Content-Type", "image/png");
+      res.send(Buffer.from(buffer));
+    } catch (e) {
+      res.status(404).end();
+    }
+  });
+
+  app.get("/icon-512.png", async (req, res) => {
+    try {
+      const response = await fetch("https://placehold.co/512x512/10b981/ffffff.png?text=AsphaltVision");
+      const buffer = await response.arrayBuffer();
+      res.setHeader("Content-Type", "image/png");
+      res.send(Buffer.from(buffer));
+    } catch (e) {
+      res.status(404).end();
+    }
+  });
 
   app.get("/robots.txt", (req, res) => {
     res.type("text/plain").send("User-agent: *\nAllow: /");
@@ -109,49 +102,7 @@ async function startServer() {
 
   app.get("/sw.js", (req, res) => {
     res.setHeader("Content-Type", "application/javascript");
-    res.send(`
-      const CACHE_NAME = 'asphalt-vision-v2';
-
-      self.addEventListener('install', (event) => {
-        self.skipWaiting();
-      });
-
-      self.addEventListener('activate', (event) => {
-        event.waitUntil(
-          caches.keys().then((cacheNames) => {
-            return Promise.all(
-              cacheNames.map((cache) => {
-                if (cache !== CACHE_NAME) {
-                  return caches.delete(cache);
-                }
-              })
-            );
-          }).then(() => self.clients.claim())
-        );
-      });
-
-      self.addEventListener('fetch', (event) => {
-        if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
-          return;
-        }
-
-        event.respondWith(
-          caches.match(event.request).then((cachedResponse) => {
-            const fetchPromise = fetch(event.request).then((networkResponse) => {
-              if (networkResponse && networkResponse.status === 200) {
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                  cache.put(event.request, responseToCache);
-                });
-              }
-              return networkResponse;
-            }).catch(() => {});
-
-            return cachedResponse || fetchPromise;
-          })
-        );
-      });
-    `);
+    res.send("self.addEventListener('fetch', (event) => { event.respondWith(fetch(event.request)); });");
   });
 
   app.use(express.json({ limit: '50mb' }));
@@ -160,19 +111,19 @@ async function startServer() {
   app.post("/api/process-image", async (req, res) => {
     const { image, mimeType } = req.body;
     
-    // Priority: 1. CLE_ASPHALTE, 2. GEMINI_API_KEY, 3. API_KEY
-    const apiKey = process.env.CLE_ASPHALTE || 
-                   process.env.GEMINI_API_KEY || 
+    // Priority: 1. GEMINI_API_KEY, 2. CLE_ASPHALTE, 3. API_KEY
+    const apiKey = process.env.GEMINI_API_KEY || 
+                   process.env.CLE_ASPHALTE || 
                    process.env.API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({ 
-        error: "CONFIGURATION REQUISE : Veuillez ajouter votre clé API dans l'onglet 'Secrets' (à gauche) avec le nom 'CLE_ASPHALTE'."
+        error: "CONFIGURATION REQUISE : Clé API Gemini manquante. Veuillez configurer votre clé 'GEMINI_API_KEY' via le menu Paramètres (Settings) de Google AI Studio."
       });
     }
 
     try {
-      const ai = new GoogleGenAI({ 
+      const ai = new GoogleGenAI({
         apiKey,
         httpOptions: {
           headers: {
@@ -224,9 +175,10 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.join(process.cwd(), "dist")));
+    const distPath = path.join(process.cwd(), "dist");
+    app.use(express.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(process.cwd(), "dist", "index.html"));
+      res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
