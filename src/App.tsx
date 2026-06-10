@@ -5,12 +5,11 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, GripVertical, X, Lock, Crown } from 'lucide-react';
+import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, X, Lock, Crown } from 'lucide-react';
 import { ImageUploader } from './components/ImageUploader';
 import { ComparisonView } from './components/ComparisonView';
 import { LegalModal, LegalDocumentType } from './components/LegalModal';
 import { applyAsphaltSealant } from './services/gemini';
-import { ReactCompareSlider } from 'react-compare-slider';
 
 const MAX_FREE_USES = 3;
 const STORAGE_KEY = 'av_uses';
@@ -486,40 +485,19 @@ export default function App() {
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   className="relative rounded-[2.5rem] overflow-hidden border-[12px] border-zinc-800/80 bg-zinc-950 shadow-[0_30px_100px_rgba(0,0,0,0.5)] aspect-[4/3] md:aspect-[16/10] group"
                 >
-                  <ReactCompareSlider
-                    itemOne={
-                      <div className="relative w-full h-full select-none pointer-events-none">
-                        <img 
-                          src="/driveway_comparison.png" 
-                          alt="Avant" 
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                    }
-                    itemTwo={
-                      <div className="relative w-full h-full select-none pointer-events-none">
-                        <img 
-                          src="/driveway_comparison.png" 
-                          alt="Après" 
-                          className="w-full h-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                    }
-                    className="h-full w-full"
-                    handle={
-                      <div className="w-1.5 h-full bg-gradient-to-b from-white/20 via-white to-white/20 relative flex items-center justify-center">
-                        <div className="w-10 h-24 bg-emerald-500 rounded-full shadow-[0_0_25px_rgba(16,185,129,0.7)] border-4 border-white flex flex-col items-center justify-center space-y-1.5 cursor-grab active:cursor-grabbing hover:scale-105 transition-transform">
-                          <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
-                          <div className="w-5 h-8 rounded-full border border-white/30 flex items-center justify-center">
-                            <GripVertical className="w-4 h-4 text-white shrink-0" />
-                          </div>
-                          <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
-                        </div>
-                      </div>
-                    }
+                  <img 
+                    src="/driveway_comparison.png" 
+                    alt="Comparaison de scellant d'asphalte" 
+                    className="w-full h-full object-cover select-none"
+                    referrerPolicy="no-referrer"
                   />
+
+                  {/* Elegant central physical divider indicating split status */}
+                  <div className="absolute inset-y-0 left-1/2 w-1 bg-gradient-to-b from-white/10 via-white/50 to-white/10 backdrop-blur-xs -translate-x-1/2 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-emerald-500 border-[4px] border-zinc-900 shadow-[0_0_30px_rgba(16,185,129,0.5)] flex items-center justify-center select-none transform group-hover:scale-105 transition-transform">
+                      <span className="font-display font-black text-white text-sm tracking-tight">VS</span>
+                    </div>
+                  </div>
 
                   {/* Absolute overlays for badges & instructions */}
                   <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 md:p-8">
