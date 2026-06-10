@@ -80,6 +80,13 @@ const translations = {
     paywallCta: "Obtenir la version Pro",
     paywallPrice: "9,99$ / mois",
     paywallClose: "Fermer",
+    uploaderTitle: "Prêt pour la transformation ?",
+    uploaderSubtitle: "Glissez votre photo ici ou choisissez une option ci-dessous.",
+    uploaderCamera: "Caméra",
+    uploaderGallery: "Galerie",
+    uploaderFormat: "Formats acceptés : JPG, PNG, HEIC",
+    examplePreview: "Aperçu de la transformation",
+    exampleUploadPrompt: "Téléchargez votre photo en haut pour simuler en direct !",
   },
   en: {
     appName: "Asphalt",
@@ -131,6 +138,13 @@ const translations = {
     paywallCta: "Get Pro Version",
     paywallPrice: "$9.99 / month",
     paywallClose: "Close",
+    uploaderTitle: "Ready for transformation?",
+    uploaderSubtitle: "Drag your photo here or choose an option below.",
+    uploaderCamera: "Camera",
+    uploaderGallery: "Gallery",
+    uploaderFormat: "Accepted formats: JPG, PNG, HEIC",
+    examplePreview: "Transformation preview",
+    exampleUploadPrompt: "Upload your photo above to simulate live!",
   }
 };
 
@@ -313,15 +327,15 @@ export default function App() {
           <div className="flex items-center space-x-3">
             {/* Badge essais restants */}
             {usesLeft > 0 && (
-              <div className="hidden sm:flex items-center space-x-1.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-medium">
-                <Sparkles className="w-3.5 h-3.5" />
+              <div className="flex items-center space-x-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border border-emerald-400/30 px-3.5 py-2 rounded-2xl text-xs font-bold shadow-[0_4px_12px_rgba(16,185,129,0.3)]">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-100 animate-pulse" />
                 <span>{t.freeRemaining(usesLeft)}</span>
               </div>
             )}
             {usesLeft === 0 && (
               <button
                 onClick={() => setShowPaywall(true)}
-                className="hidden sm:flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-2xl text-xs font-bold transition-all"
+                className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shadow-lg animate-bounce"
               >
                 <Crown className="w-3.5 h-3.5" />
                 <span>Pro</span>
@@ -380,14 +394,14 @@ export default function App() {
                 {/* Badge mobile essais restants */}
                 <div className="sm:hidden">
                   {usesLeft > 0 ? (
-                    <div className="inline-flex items-center space-x-1.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-medium">
+                    <div className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border border-emerald-400/30 px-4 py-2 rounded-2xl text-xs font-bold shadow-[0_4px_12px_rgba(16,185,129,0.3)]">
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>{t.freeRemaining(usesLeft)}</span>
                     </div>
                   ) : (
                     <button
                       onClick={() => setShowPaywall(true)}
-                      className="inline-flex items-center space-x-1.5 bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold"
+                      className="inline-flex items-center space-x-1.5 bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-lg"
                     >
                       <Crown className="w-4 h-4" />
                       <span>{t.paywallCta}</span>
@@ -395,6 +409,35 @@ export default function App() {
                   )}
                 </div>
               </div>
+
+              {/* Quota / trial indicator (Talon d'accès) */}
+              {usesLeft > 0 && (
+                <div className="flex flex-col items-center justify-center space-y-3 bg-zinc-950/70 border border-white/10 p-5 rounded-[2rem] max-w-sm mx-auto shadow-2xl backdrop-blur-md relative overflow-hidden">
+                  <div className="absolute -right-4 -top-4 w-12 h-12 bg-emerald-500/20 rounded-full blur-xl pointer-events-none" />
+                  <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-400">
+                    <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
+                    <span className="uppercase tracking-widest">{lang === 'fr' ? 'Compteur d\'Essais' : 'Trial Counter'}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    {[1, 2, 3].map((step) => {
+                      const isActive = step <= usesLeft;
+                      return (
+                        <div
+                          key={step}
+                          className={`w-12 h-3.5 rounded-full transition-all duration-500 ${
+                            isActive 
+                              ? 'bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.7)] scale-110' 
+                              : 'bg-zinc-800 border border-white/5 opacity-40'
+                          }`}
+                        />
+                      );
+                    })}
+                  </div>
+                  <p className="text-white text-sm font-bold font-display text-center">
+                    {t.freeRemaining(usesLeft)} / {MAX_FREE_USES} gratuit
+                  </p>
+                </div>
+              )}
 
               <div className="relative">
                 <div className="absolute -inset-4 bg-emerald-500/10 blur-3xl rounded-full -z-10" />
@@ -404,7 +447,7 @@ export default function App() {
                     className="relative cursor-pointer"
                   >
                     <div className="pointer-events-none opacity-50">
-                      <ImageUploader onImageSelect={processImage} isLoading={isLoading} />
+                      <ImageUploader onImageSelect={processImage} isLoading={isLoading} t={t} />
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/60 rounded-3xl backdrop-blur-sm">
                       <div className="text-center space-y-3">
@@ -417,7 +460,7 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  <ImageUploader onImageSelect={processImage} isLoading={isLoading} />
+                  <ImageUploader onImageSelect={processImage} isLoading={isLoading} t={t} />
                 )}
               </div>
 
@@ -432,7 +475,7 @@ export default function App() {
                 <div className="text-center space-y-3">
                   <div className="inline-flex items-center space-x-2 bg-emerald-400/10 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
                     <Eye className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Aperçu de la transformation</span>
+                    <span>{t.examplePreview}</span>
                   </div>
                   <h2 className="text-3xl font-bold font-display text-white">{t.exampleTitle}</h2>
                   <p className="text-zinc-400 max-w-lg mx-auto leading-relaxed text-sm">{t.exampleSubtitle}</p>
@@ -460,7 +503,7 @@ export default function App() {
                     </div>
                     <div className="w-full text-center">
                       <span className="inline-block bg-black/60 backdrop-blur-md text-zinc-300 text-xs px-5 py-2.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        Téléchargez votre photo en haut pour simuler en direct !
+                        {t.exampleUploadPrompt}
                       </span>
                     </div>
                   </div>
