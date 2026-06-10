@@ -10,6 +10,7 @@ import { ImageUploader } from './components/ImageUploader';
 import { ComparisonView } from './components/ComparisonView';
 import { LegalModal, LegalDocumentType } from './components/LegalModal';
 import { applyAsphaltSealant } from './services/gemini';
+import { ReactCompareSlider } from 'react-compare-slider';
 
 const MAX_FREE_USES = 3;
 const STORAGE_KEY = 'av_uses';
@@ -203,7 +204,7 @@ function PaywallModal({ t, onClose }: { t: typeof translations['fr'], onClose: (
 
           <div className="space-y-3">
             <button
-              onClick={() => window.open('https://buy.stripe.com/cNi00idtsdjA7sVaqT28800', '_blank')}
+              onClick={() => window.open('https://buy.stripe.com/4gM5kCcpo93k4gJbuX28801', '_blank')}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-2"
             >
               <Crown className="w-5 h-5" />
@@ -235,6 +236,18 @@ export default function App() {
   const [activeLegalModal, setActiveLegalModal] = useState<LegalDocumentType>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [usesLeft, setUsesLeft] = useState(remainingUses());
+  const [isPremium, setIsPremium] = useState(() => {
+    return localStorage.getItem('av_premium') === 'true';
+  });
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+      localStorage.setItem('av_premium', 'true');
+      setIsPremium(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const loadingMessages = t.loadingSteps;
 
@@ -251,7 +264,7 @@ export default function App() {
 
   const processImage = useCallback(async (file: File) => {
     // Vérifier les essais disponibles
-    if (!canUse()) {
+    if (!isPremium && !canUse()) {
       setShowPaywall(true);
       return;
     }
@@ -278,9 +291,11 @@ export default function App() {
       setProcessedImage(result);
       setProgress(100);
 
-      // Incrémenter seulement si succès
-      incrementUseCount();
-      setUsesLeft(remainingUses());
+      // Incrémenter seulement si succès et pas premium
+      if (!isPremium) {
+        incrementUseCount();
+        setUsesLeft(remainingUses());
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Désolé, une erreur est survenue lors du traitement de l'image. Veuillez réessayer.");
@@ -288,7 +303,7 @@ export default function App() {
       setIsLoading(false);
       clearInterval(interval);
     }
-  }, []);
+  }, [loadingMessages.length, isPremium]);
 
   const handleReset = () => {
     setOriginalImage(null);
@@ -325,22 +340,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center space-x-3">
-            {/* Badge essais restants */}
-            {usesLeft > 0 && (
-              <div className="flex items-center space-x-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border border-emerald-400/30 px-3.5 py-2 rounded-2xl text-xs font-bold shadow-[0_4px_12px_rgba(16,185,129,0.3)]">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-100 animate-pulse" />
-                <span>{t.freeRemaining(usesLeft)}</span>
-              </div>
-            )}
-            {usesLeft === 0 && (
-              <button
-                onClick={() => setShowPaywall(true)}
-                className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-2xl text-xs font-bold transition-all shadow-lg animate-bounce"
-              >
-                <Crown className="w-3.5 h-3.5" />
-                <span>Pro</span>
-              </button>
-            )}
             <button 
               onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
               className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-2xl border border-white/10 transition-all text-sm font-medium"
@@ -391,27 +390,11 @@ export default function App() {
                   {t.heroSubtitle}
                 </p>
 
-                {/* Badge mobile essais restants */}
-                <div className="sm:hidden">
-                  {usesLeft > 0 ? (
-                    <div className="inline-flex items-center space-x-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border border-emerald-400/30 px-4 py-2 rounded-2xl text-xs font-bold shadow-[0_4px_12px_rgba(16,185,129,0.3)]">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{t.freeRemaining(usesLeft)}</span>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowPaywall(true)}
-                      className="inline-flex items-center space-x-1.5 bg-emerald-600 text-white px-4 py-2 rounded-2xl text-sm font-bold shadow-lg"
-                    >
-                      <Crown className="w-4 h-4" />
-                      <span>{t.paywallCta}</span>
-                    </button>
-                  )}
-                </div>
               </div>
 
-              {/* Quota / trial indicator (Talon d'accès) */}
-              {usesLeft > 0 && (
+
+              {/* Quota / trial indicator (Talon d'accès) ou Forfait Premium */}
+              {!isPremium ? (usesLeft > 0 && (
                 <div className="flex flex-col items-center justify-center space-y-3 bg-zinc-950/70 border border-white/10 p-5 rounded-[2rem] max-w-sm mx-auto shadow-2xl backdrop-blur-md relative overflow-hidden">
                   <div className="absolute -right-4 -top-4 w-12 h-12 bg-emerald-500/20 rounded-full blur-xl pointer-events-none" />
                   <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-400">
@@ -434,14 +417,28 @@ export default function App() {
                     })}
                   </div>
                   <p className="text-white text-sm font-bold font-display text-center">
-                    {t.freeRemaining(usesLeft)} / {MAX_FREE_USES} gratuit
+                    {t.freeRemaining(usesLeft)} / {MAX_FREE_USES} {lang === 'fr' ? 'gratuit' : 'free'}
                   </p>
+                </div>
+              )) : (
+                <div className="flex flex-col items-center justify-center space-y-4 bg-zinc-950/70 border border-emerald-500/30 p-5 rounded-[2rem] max-w-sm mx-auto shadow-2xl backdrop-blur-md relative overflow-hidden">
+                  <div className="absolute -left-4 -bottom-4 w-16 h-16 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none" />
+                  <div className="flex items-center space-x-2">
+                    <Crown className="w-6 h-6 text-emerald-400" />
+                    <h3 className="text-xl font-bold font-display text-white">Forfait Premium</h3>
+                  </div>
+                  <button
+                    onClick={() => window.open('https://billing.stripe.com/p/login/cNi00idtsdjA7sVaqT28800', '_blank')}
+                    className="border border-white/10 hover:bg-white/5 text-zinc-300 px-6 py-2 rounded-xl text-sm font-medium transition-colors"
+                  >
+                    Canceller
+                  </button>
                 </div>
               )}
 
               <div className="relative">
                 <div className="absolute -inset-4 bg-emerald-500/10 blur-3xl rounded-full -z-10" />
-                {usesLeft === 0 ? (
+                {!isPremium && usesLeft === 0 ? (
                   <div
                     onClick={() => setShowPaywall(true)}
                     className="relative cursor-pointer"
@@ -484,14 +481,44 @@ export default function App() {
                 <motion.div 
                   whileHover={{ scale: 1.01 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="relative rounded-[2.5rem] overflow-hidden border-[12px] border-zinc-800/80 bg-zinc-950 shadow-[0_30px_100px_rgba(0,0,0,0.5)] aspect-[4/3] md:aspect-[16/10] group cursor-default"
+                  className="relative rounded-[2.5rem] overflow-hidden border-[12px] border-zinc-800/80 bg-zinc-950 shadow-[0_30px_100px_rgba(0,0,0,0.5)] aspect-[4/3] md:aspect-[16/10] group"
                 >
-                  <img 
-                    src="/driveway_comparison.png" 
-                    alt="Exemple de simulation scellant d'asphalte"
-                    className="w-full h-full object-cover select-none"
-                    referrerPolicy="no-referrer"
+                  <ReactCompareSlider
+                    itemOne={
+                      <div className="relative w-full h-full select-none pointer-events-none">
+                        <img 
+                          src="/driveway_comparison.png" 
+                          alt="Avant" 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                    }
+                    itemTwo={
+                      <div className="relative w-full h-full select-none pointer-events-none">
+                        <img 
+                          src="/driveway_comparison.png" 
+                          alt="Après" 
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                    }
+                    className="h-full w-full"
+                    handle={
+                      <div className="w-1.5 h-full bg-gradient-to-b from-white/20 via-white to-white/20 relative flex items-center justify-center">
+                        <div className="w-10 h-24 bg-emerald-500 rounded-full shadow-[0_0_25px_rgba(16,185,129,0.7)] border-4 border-white flex flex-col items-center justify-center space-y-1.5 cursor-grab active:cursor-grabbing hover:scale-105 transition-transform">
+                          <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
+                          <div className="w-5 h-8 rounded-full border border-white/30 flex items-center justify-center">
+                            <GripVertical className="w-4 h-4 text-white shrink-0" />
+                          </div>
+                          <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
+                        </div>
+                      </div>
+                    }
                   />
+
+                  {/* Absolute overlays for badges & instructions */}
                   <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-6 md:p-8">
                     <div className="flex justify-between items-start w-full">
                       <div className="bg-zinc-900/90 backdrop-blur-md border border-white/10 text-zinc-100 font-display font-medium uppercase tracking-widest text-xs sm:text-sm px-6 py-2.5 rounded-full shadow-lg">
@@ -505,15 +532,6 @@ export default function App() {
                       <span className="inline-block bg-black/60 backdrop-blur-md text-zinc-300 text-xs px-5 py-2.5 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         {t.exampleUploadPrompt}
                       </span>
-                    </div>
-                  </div>
-                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1.5 bg-gradient-to-b from-white/20 via-white/80 to-white/20 flex items-center justify-center pointer-events-none">
-                    <div className="w-10 h-24 bg-emerald-500 rounded-full shadow-[0_0_25px_rgba(16,185,129,0.7)] border-4 border-white flex flex-col items-center justify-center space-y-1.5">
-                      <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
-                      <div className="w-5 h-8 rounded-full border border-white/30 flex items-center justify-center">
-                        <GripVertical className="w-4 h-4 text-white shrink-0" />
-                      </div>
-                      <div className="w-1.5 h-1.5 bg-white rounded-full opacity-90 animate-pulse" />
                     </div>
                   </div>
                 </motion.div>
@@ -562,7 +580,7 @@ export default function App() {
               <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold font-display text-white">{t.resultTitle}</h2>
                 <p className="text-zinc-300 text-lg">{t.resultSubtitle}</p>
-                {usesLeft > 0 && (
+                {!isPremium && usesLeft > 0 && (
                   <div className="inline-flex items-center space-x-1.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-medium">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{t.freeRemaining(usesLeft)}</span>

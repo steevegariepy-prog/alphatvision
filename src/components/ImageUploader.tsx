@@ -5,9 +5,16 @@ import { motion } from 'motion/react';
 interface ImageUploaderProps {
   onImageSelect: (file: File) => void;
   isLoading: boolean;
+  t: {
+    uploaderTitle: string;
+    uploaderSubtitle: string;
+    uploaderCamera: string;
+    uploaderGallery: string;
+    uploaderFormat: string;
+  };
 }
 
-export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, isLoading }) => {
+export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, isLoading, t }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const cameraInputRef = React.useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -60,8 +67,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, isL
           </div>
           
           <div className="space-y-3">
-            <h2 className="text-3xl font-bold font-display text-zinc-900">Prêt pour la transformation ?</h2>
-            <p className="text-zinc-500 text-lg max-w-sm mx-auto">Glissez votre photo ici ou choisissez une option ci-dessous.</p>
+            <h2 className="text-3xl font-bold font-display text-zinc-900">{t.uploaderTitle}</h2>
+            <p className="text-zinc-500 text-lg max-w-sm mx-auto">{t.uploaderSubtitle}</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
@@ -71,7 +78,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, isL
               className="flex-1 flex items-center justify-center space-x-3 bg-zinc-900 text-white py-5 px-8 rounded-2xl font-bold hover:bg-zinc-800 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-xl shadow-zinc-200"
             >
               <Camera className="w-5 h-5" />
-              <span>Caméra</span>
+              <span>{t.uploaderCamera}</span>
             </button>
             
             <button
@@ -80,11 +87,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, isL
               className="flex-1 flex items-center justify-center space-x-3 bg-white border-2 border-zinc-200 text-zinc-900 py-5 px-8 rounded-2xl font-bold hover:bg-zinc-50 transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             >
               <Upload className="w-5 h-5" />
-              <span>Galerie</span>
+              <span>{t.uploaderGallery}</span>
             </button>
           </div>
 
-          <p className="text-zinc-400 text-sm font-medium">Format acceptés : JPG, PNG, HEIC</p>
+          <p className="text-zinc-400 text-sm font-medium">{t.uploaderFormat}</p>
 
           <input
             type="file"
