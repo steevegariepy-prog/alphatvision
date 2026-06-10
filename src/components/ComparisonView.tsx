@@ -56,14 +56,6 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ original, proces
       {/* Block 2: Download actions */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
         <button
-          onClick={() => handleDownload(original, 'asphalte-original.png')}
-          className="flex items-center justify-center space-x-3 bg-zinc-900 text-white py-4 px-10 rounded-2xl font-bold hover:bg-zinc-800 transition-all shadow-xl shadow-zinc-200 active:scale-95 w-full sm:w-auto cursor-pointer"
-        >
-          <Download className="w-5 h-5" />
-          <span>Enregistrer l'original</span>
-        </button>
-
-        <button
           onClick={() => handleDownload(processed, 'asphalte-pro-vision.png')}
           className="flex items-center justify-center space-x-3 bg-emerald-600 text-white py-4 px-10 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 active:scale-95 w-full sm:w-auto cursor-pointer"
         >
