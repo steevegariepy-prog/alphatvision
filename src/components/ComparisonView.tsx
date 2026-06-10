@@ -42,10 +42,10 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ original, proces
         />
         
         <div className="absolute top-6 left-6 bg-black/40 backdrop-blur-xl border border-white/20 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
-          État Actuel
+          Actuel
         </div>
         <div className="absolute top-6 right-6 bg-emerald-600/60 backdrop-blur-xl border border-white/20 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
-          Simulation Pro
+          Simulation
         </div>
 
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-md text-white px-6 py-2 rounded-full text-sm font-medium">
