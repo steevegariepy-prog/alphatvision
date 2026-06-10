@@ -20,8 +20,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const promptText = finishOption === 'glossy' 
-    ? "Change ONLY the driveway surface to be EXTREMELY SHINY, WET, and HIGHLY REFLECTIVE black. It must look exactly like fresh, wet glossy tar or premium wet-look asphalt sealant. Force bright, glaring white reflections of the sky and environment onto the driveway surface. The driveway must look like a sleek, wet mirror. Do not touch or change the house, grass, sky, or anything else."
-    : "Change ONLY the driveway surface to be a FLAT, DRY, DULL, MATTE charcoal-black color. It must look like standard dry asphalt with absolutely NO shine and NO reflections. It must look completely dry, rough, and textured. Do not touch or change the house, grass, sky, or anything else.";
+    ? "Modify ONLY the driveway surface to show a fresh, professional SATIN-GLOSS bitumen sealant look (scellant de bitume lustré). Transform the driveway into a deep, rich, saturated carbon-black color with a soft, uniform oil-satin finish. This must look like coated asphalt, NOT a flat pool of liquid water or a perfect mirror reflection. It should gently catch the sunlight with soft, dispersed satin sheen highlights, emphasizing the fine, realistic granular aggregate texture of the asphalt. Remove all cracks and stains. The house, grass, brick borders, and sky must remain absolutely unchanged and realistic, with clean, professional edge transitions."
+    : "Modify ONLY the driveway surface to show a fresh, professional MATTE bitumen sealant finish (scellant de bitume mat). Transform the driveway into a uniform, deep rich charcoal-black color with a flat, non-reflective surface. The texturing should look like dry asphalt with a fine, detailed granular aggregate structure. There must be absolutely no reflections, no specular glare, and no glossy/wet appearance. Remove all cracks, old lines, and weathered gray patches. The house, lawn, borders, and sky must remain completely untouched, with a seamless, crisp border transition.";
 
   try {
     const ai = new GoogleGenAI({ apiKey });
