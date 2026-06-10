@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politique de Confidentialité | Privacy Policy - AsphaltVision</title>
+    <style>
+        :root {
+            --bg-color: #0f1013;
+            --card-color: #16181d;
+            --text-color: #e4e4e7;
+            --text-muted: #a1a1aa;
+            --primary: #10b981;
+            --primary-hover: #34d399;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 30px;
+        }
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin: 0 0 10px 0;
+        }
+        .logo-text span {
+            color: var(--primary);
+        }
+        h1 {
+            font-size: 24px;
+            margin-top: 40px;
+            color: #ffffff;
+            border-left: 4px solid var(--primary);
+            padding-left: 15px;
+        }
+        h2 {
+            font-size: 18px;
+            color: #ffffff;
+            margin-top: 25px;
+        }
+        p, li {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .card {
+            background: var(--card-color);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 60px;
+        }
+        .section-en {
+            display: none;
+        }
+    </style>
+    <script>
+        function setLang(lang) {
+            if (lang === 'fr') {
+                document.querySelectorAll('.section-fr').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.section-en').forEach(el => el.style.display = 'none');
+                document.documentElement.lang = 'fr';
+            } else {
+                document.querySelectorAll('.section-fr').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.section-en').forEach(el => el.style.display = 'block');
+                document.documentElement.lang = 'en';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-text">ASPHALT<span>VISION</span></div>
+            <div class="lang-switch">
+                <button class="lang-btn" onclick="setLang('fr')">Français</button>
+                <button class="lang-btn" onclick="setLang('en')">English</button>
+            </div>
+        </header>
+
+        <!-- FRENCH VERSION -->
+        <div class="section-fr">
+            <div class="card">
+                <div class="badge">Dernière mise à jour : 10 juin 2026</div>
+                <h1>Politique de Confidentialité</h1>
+                <p>Chez <strong>AsphaltVision</strong>, la protection de vos données personnelles est notre priorité absolue. Cette politique de confidentialité décrit comment nous recueillons, traitons et protégeons vos données lorsque vous utilisez notre application mobile et nos services en ligne.</p>
+            </div>
+
+            <h2>1. Collecte et Traitement des Données</h2>
+            <p>Nous limitons la collecte de données au strict nécessaire pour vous fournir le service de simulation d'asphalte :</p>
+            <ul>
+                <li><strong>Images téléversées :</strong> Toutes les photos d'entrées de garage ou de surfaces que vous soumettez à l'application sont transmises via une connexion cryptée et sécurisée SSL à l'API officielle de Google Gemini à des fins de traitement d'image.</li>
+                <li><strong>Absence de stockage persistant :</strong> Nous ne conservons pas vos images de manière persistante sur nos serveurs et nous ne les revendons à aucun tiers. Vos photos ne sont utilisées que pendant le temps nécessaire à la production de la simulation.</li>
+            </ul>
+
+            <h2>2. Clés API et Sécurité des données</h2>
+            <p>Notre application utilise l'API de traitement d'intelligence artificielle Google Gemini pour identifier et modifier les surfaces d'asphalte. Toutes les transmissions de données entre votre appareil, nos serveurs de traitement et les serveurs de Google sont entièrement cryptées de bout en bout.</p>
+
+            <h2>3. Conservation des Données</h2>
+            <p>Toutes les images traitées sont stockées en mémoire tampon temporaire uniquement. Dès que vous fermez votre session d'utilisation ou que vous quittez la page, les données visuelles sont immédiatement libérées de la mémoire.</p>
+
+            <h2>4. Droits des Utilisateurs</h2>
+            <p>Conformément aux réglementations sur la protection des données (notamment le RGPD et la Loi sur la protection des renseignements personnels), vous conservez le contrôle total de vos données. Comme nous ne stockons aucune information nominative ni aucune image persistante, aucun profil personnel n'est créé ou associé à votre appareil.</p>
+
+            <h2>5. Modifications de cette Politique</h2>
+            <p>Nous pouvons mettre à jour ces règles régulièrement pour refléter les évolutions technologiques et légales. Toute mise à jour majeure sera indiquée directement sur cette page.</p>
+
+            <h2>6. Nous Contacter</h2>
+            <p>Si vous avez des questions concernant la confidentialité chez AsphaltVision, vous pouvez nous écrire à l'adresse courriel suivante : <a href="mailto:steevegariepy@gmail.com" style="color: var(--primary);">steevegariepy@gmail.com</a></p>
+        </div>
+
+        <!-- ENGLISH VERSION -->
+        <div class="section-en">
+            <div class="card">
+                <div class="badge">Last Updated: June 10, 2026</div>
+                <h1>Privacy Policy</h1>
+                <p>At <strong>AsphaltVision</strong>, protecting your personal data is our top priority. This Privacy Policy outlines how we collect, process, and secure your information when using our mobile application and online services.</p>
+            </div>
+
+            <h2>1. Data Collection and Processing</h2>
+            <p>We restrict data collection to the absolute minimum necessary to provide you with the asphalt rendering service:</p>
+            <ul>
+                <li><strong>Uploaded Images:</strong> Any photos of driveways/surfaces that you upload are transmitted via a secure, encrypted SSL protocol to the official Google Gemini API for simulation processing.</li>
+                <li><strong>Zero Persistent Storage:</strong> We do not store your original or processed images permanently on our servers and we do not sell your photos. They are used strictly to output the digital simulation.</li>
+            </ul>
+
+            <h2>2. API Keys and Security</h2>
+            <p>Our application leverages the Google Gemini Artificial Intelligence API to locate and modify asphalt driveway spaces. All communication channels between your device, our API handlers, and the AI models are fully encrypted using standard transport layer security.</p>
+
+            <h2>3. Data Retention</h2>
+            <p>All processed images are handled in transient buffer memory. As soon as you end your active session, close your browser tab, or request a fresh start, all temporary visual files are instantly purged.</p>
+
+            <h2>4. User Rights</h2>
+            <p>In accordance with active global data regulations, you hold full rights over your data. Because we do not store any identifying account details or permanent images, no consumer advertising profiles are generated or tracked in connection with your phone or tablet.</p>
+
+            <h2>5. Policy Changes</h2>
+            <p>We may upgrade these terms periodically to reflect any technical and regulatory updates. Any adjustments will be posted directly right on this page.</p>
+
+            <h2>6. Contact Us</h2>
+            <p>For any inquiries regarding your privacy with AsphaltVision, please contact us at: <a href="mailto:steevegariepy@gmail.com" style="color: var(--primary);">steevegariepy@gmail.com</a></p>
+        </div>
+
+        <footer>
+            <p>© 2026 AsphaltVision. Tous droits réservés. Powered by QuantumApp.</p>
+        </footer>
+    </div>
+</body>
+</html>
