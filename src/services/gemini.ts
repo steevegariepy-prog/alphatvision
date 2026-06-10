@@ -3,7 +3,7 @@
  * de manière sécurisée et robuste sans exposer l'API key au navigateur.
  */
 
-export async function applyAsphaltSealant(base64Image: string, mimeType: string): Promise<string> {
+export async function applyAsphaltSealant(base64Image: string, mimeType: string, finishOption: 'matte' | 'glossy' = 'matte'): Promise<string> {
   try {
     const response = await fetch("/api/process-image", {
       method: "POST",
@@ -13,6 +13,7 @@ export async function applyAsphaltSealant(base64Image: string, mimeType: string)
       body: JSON.stringify({
         image: base64Image,
         mimeType: mimeType || "image/jpeg",
+        finishOption
       }),
     });
 

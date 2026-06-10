@@ -228,7 +228,7 @@ export default function App() {
   const t = translations[lang];
   
   const [originalImage, setOriginalImage] = useState<string | null>(null);
-  const [processedImage, setProcessedImage] = useState<string | null>(null);
+  const [processedImages, setProcessedImages] = useState<{ matte: string; glossy: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -287,8 +287,11 @@ export default function App() {
       const base64 = await base64Promise;
       setOriginalImage(base64);
 
-      const result = await applyAsphaltSealant(base64, file.type);
-      setProcessedImage(result);
+      const [matteResult, glossyResult] = await Promise.all([
+        applyAsphaltSealant(base64, file.type, 'matte'),
+        applyAsphaltSealant(base64, file.type, 'glossy')
+      ]);
+      setProcessedImages({ matte: matteResult, glossy: glossyResult });
       setProgress(100);
 
       // Incrémenter seulement si succès et pas premium
@@ -307,7 +310,7 @@ export default function App() {
 
   const handleReset = () => {
     setOriginalImage(null);
-    setProcessedImage(null);
+    setProcessedImages(null);
     setError(null);
   };
 
@@ -570,7 +573,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {processedImage && originalImage && !isLoading && (
+          {processedImages && originalImage && !isLoading && (
             <motion.div
               key="result"
               initial={{ opacity: 0, y: 20 }}
@@ -587,11 +590,24 @@ export default function App() {
                   </div>
                 )}
               </div>
-              <ComparisonView 
-                original={originalImage} 
-                processed={processedImage} 
-                onReset={handleReset} 
-              />
+              <div className="space-y-16">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold font-display text-center text-white">{lang === 'fr' ? 'Finition Noir Mat' : 'Matte Black Finish'}</h3>
+                  <ComparisonView 
+                    original={originalImage} 
+                    processed={processedImages.matte} 
+                    onReset={handleReset} 
+                  />
+                </div>
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold font-display text-center text-white">{lang === 'fr' ? 'Finition Noir Brillant' : 'Glossy Black Finish'}</h3>
+                  <ComparisonView 
+                    original={originalImage} 
+                    processed={processedImages.glossy} 
+                    onReset={handleReset} 
+                  />
+                </div>
+              </div>
             </motion.div>
           )}
 

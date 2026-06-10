@@ -38,12 +38,13 @@ async function startServer() {
     background_color: "#18181b",
     theme_color: "#18181b",
     icons: [
-      { src: "/icon.svg", sizes: "192x192 512x512", type: "image/svg+xml", purpose: "any" },
-      { src: "/icon.svg", sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
-      { src: "/icon.svg", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
     ],
     screenshots: [
-      { src: "/icon.svg", sizes: "512x512", type: "image/svg+xml", form_factor: "narrow" }
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png", form_factor: "narrow" }
     ]
   };
 
@@ -76,10 +77,7 @@ async function startServer() {
   // 3. Icônes Locales (Indispensable pour le packaging Android)
   app.get("/icon-192.png", async (req, res) => {
     try {
-      const response = await fetch("https://placehold.co/192x192/10b981/ffffff.png?text=AV");
-      const buffer = await response.arrayBuffer();
-      res.setHeader("Content-Type", "image/png");
-      res.send(Buffer.from(buffer));
+      res.sendFile(path.join(currentDirname, "public", "icon-192.png"));
     } catch (e) {
       res.status(404).end();
     }
@@ -87,10 +85,7 @@ async function startServer() {
 
   app.get("/icon-512.png", async (req, res) => {
     try {
-      const response = await fetch("https://placehold.co/512x512/10b981/ffffff.png?text=AsphaltVision");
-      const buffer = await response.arrayBuffer();
-      res.setHeader("Content-Type", "image/png");
-      res.send(Buffer.from(buffer));
+      res.sendFile(path.join(currentDirname, "public", "icon-512.png"));
     } catch (e) {
       res.status(404).end();
     }

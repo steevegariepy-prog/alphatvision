@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { image, mimeType } = req.body;
+  const { image, mimeType, finishOption } = req.body;
 
   const apiKey = process.env.GEMINI_API_KEY ||
                  process.env.CLE_ASPHALTE ||
@@ -18,6 +18,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!apiKey) {
     return res.status(500).json({ error: "Clé API Gemini manquante." });
   }
+
+  const promptText = finishOption === 'glossy' 
+    ? "Change ONLY the driveway surface to be EXTREMELY SHINY, WET, and HIGHLY REFLECTIVE black. It must look exactly like fresh, wet glossy tar or premium wet-look asphalt sealant. Force bright, glaring white reflections of the sky and environment onto the driveway surface. The driveway must look like a sleek, wet mirror. Do not touch or change the house, grass, sky, or anything else."
+    : "Change ONLY the driveway surface to be a FLAT, DRY, DULL, MATTE charcoal-black color. It must look like standard dry asphalt with absolutely NO shine and NO reflections. It must look completely dry, rough, and textured. Do not touch or change the house, grass, sky, or anything else.";
 
   try {
     const ai = new GoogleGenAI({ apiKey });
@@ -32,7 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             },
           },
           {
-            text: "Modify this image to show a freshly sealed asphalt driveway. The asphalt areas should be transformed into a uniform, deep matte black color with a subtle granular texture. Remove all cracks, stains, and graying from the asphalt. Ensure the rest of the image (house, grass, cars, sky, walls) remains completely unchanged and realistic. The transition between the new asphalt and the surroundings must be seamless and professional. Return only the modified image.",
+            text: promptText,
           },
         ],
       },
