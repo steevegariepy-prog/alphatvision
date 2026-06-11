@@ -104,7 +104,7 @@ async function startServer() {
   
   // Server-side processing to bypass Wix/Browser restrictions
   app.post("/api/process-image", async (req, res) => {
-    const { image, mimeType } = req.body;
+    const { image, mimeType, finishOption } = req.body;
     
     // Priority: 1. GEMINI_API_KEY, 2. CLE_ASPHALTE, 3. API_KEY
     const apiKey = process.env.GEMINI_API_KEY || 
@@ -116,6 +116,11 @@ async function startServer() {
         error: "CONFIGURATION REQUISE : Clé API Gemini manquante. Veuillez configurer votre clé 'GEMINI_API_KEY' via le menu Paramètres (Settings) de Google AI Studio."
       });
     }
+
+    const isGlossy = finishOption === 'glossy';
+    const finishPrompt = isGlossy
+      ? "Modify this image to show a freshly sealed asphalt driveway. Keep any public street, public road, sidewalk, or neighboring asphalt completely untouched and in its original state; only transform the private driveway area that belongs to the house. The private driveway's asphalt should be transformed into a uniform, rich, deep glossy black color with a beautiful shiny wet-look sheen, reflecting subtle lighting highlights, as if premium asphalt sealer was freshly poured. Remove all cracks, stains, and graying from the driveway asphalt. Ensure the rest of the image (house, grass, cars, sky, walls, public street) remains completely unchanged and realistic. The transition between the new driveway and the surroundings must be seamless and professional. Return only the modified image."
+      : "Modify this image to show a freshly sealed asphalt driveway. Keep any public street, public road, sidewalk, or neighboring asphalt completely untouched and in its original state; only transform the private driveway area that belongs to the house. The private driveway's asphalt should be transformed into a uniform, deep matte black color with a subtle granular texture. Remove all cracks, stains, and graying from the driveway asphalt. Ensure the rest of the image (house, grass, cars, sky, walls, public street) remains completely unchanged and realistic. The transition between the new driveway and the surroundings must be seamless and professional. Return only the modified image.";
 
     try {
       const ai = new GoogleGenAI({
@@ -137,7 +142,7 @@ async function startServer() {
               },
             },
             {
-              text: "Modify this image to show a freshly sealed asphalt driveway. The asphalt areas should be transformed into a uniform, deep matte black color with a subtle granular texture. Remove all cracks, stains, and graying from the asphalt. Ensure the rest of the image (house, grass, cars, sky, walls) remains completely unchanged and realistic. The transition between the new asphalt and the surroundings must be seamless and professional. Return only the modified image.",
+              text: finishPrompt,
             },
           ],
         },
@@ -157,6 +162,11 @@ async function startServer() {
 
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // Support explicit privacy policy page requests for Google Play Store review
+  app.get(["/privacy", "/privacy.html"], (req, res) => {
+    res.sendFile(path.join(currentDirname, "public", "privacy.html"));
   });
 
   if (process.env.NODE_ENV !== "production") {
