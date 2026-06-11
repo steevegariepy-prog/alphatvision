@@ -18,8 +18,8 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ original, proces
     link.click();
   };
 
-  const beforeLabel = lang === 'fr' ? 'État Actuel' : 'Current State';
-  const afterLabel = lang === 'fr' ? 'Simulation Pro' : 'Pro Simulation';
+  const beforeLabel = lang === 'fr' ? 'Actuel' : 'Current';
+  const afterLabel = lang === 'fr' ? 'Scellant frais' : 'Fresh sealant';
 
   return (
     <div className="w-full max-w-6xl mx-auto p-0 sm:p-4 space-y-10">
@@ -64,7 +64,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ original, proces
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 sm:px-0">
         <button
           onClick={() => handleDownload(processed, `vision-asphalte-${lang}.png`)}
-          className="flex items-center justify-center space-x-3 bg-emerald-600 text-white py-4 px-10 rounded-2xl font-bold hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-950/45 active:scale-95 w-full sm:w-auto cursor-pointer"
+          className="flex items-center justify-center space-x-3 bg-emerald-600 text-white py-4 px-10 rounded-2xl font-bold hover:bg-emerald-500 transition-all shadow-[0_15px_30px_rgba(16,185,129,0.45)] active:scale-95 w-full sm:w-auto cursor-pointer"
         >
           <Download className="w-5 h-5" />
           <span>{lang === 'fr' ? 'Enregistrer la simulation' : 'Save simulation'}</span>
