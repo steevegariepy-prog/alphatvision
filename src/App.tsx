@@ -207,7 +207,12 @@ const FeatureCard = ({ icon: Icon, title, description }: { icon: any, title: str
   </motion.div>
 );
 
-function PaywallModal({ t, onClose }: { t: typeof translations['fr'], onClose: () => void }) {
+// ─── CHANGEMENT 1 : ajout de setUsesLeft dans les props ───────────────────────
+function PaywallModal({ t, onClose, setUsesLeft }: {
+  t: typeof translations['fr'];
+  onClose: () => void;
+  setUsesLeft: (n: number) => void;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -248,8 +253,22 @@ function PaywallModal({ t, onClose }: { t: typeof translations['fr'], onClose: (
           </div>
 
           <div className="space-y-3">
+            {/* ─── CHANGEMENT 2 : bouton dual-context Google Play / Stripe ─── */}
             <button
-              onClick={() => window.open('https://buy.stripe.com/5kQaEW0GG0wO14xcz128802', '_blank')}
+              onClick={async () => {
+                if (isPlayStoreContext()) {
+                  // Contexte Play Store → Google Play Billing
+                  const token = await purchaseWithGooglePlay();
+                  if (token) {
+                    addPurchasedUses(150);
+                    setUsesLeft(remainingUses());
+                    onClose();
+                  }
+                } else {
+                  // Contexte web → Stripe (inchangé)
+                  window.open('https://buy.stripe.com/5kQaEW0GG0wO14xcz128802', '_blank');
+                }
+              }}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-[0_0_35px_rgba(16,185,129,0.35)] hover:shadow-[0_0_45px_rgba(16,185,129,0.55)] border border-emerald-400/20 flex items-center justify-center space-x-2"
             >
               <Crown className="w-5 h-5" />
@@ -808,9 +827,10 @@ export default function App() {
       />
 
       {/* Paywall Modal */}
+      {/* ─── CHANGEMENT 3 : passage de setUsesLeft au modal ─── */}
       <AnimatePresence>
         {showPaywall && (
-          <PaywallModal t={t} onClose={() => setShowPaywall(false)} />
+          <PaywallModal t={t} onClose={() => setShowPaywall(false)} setUsesLeft={setUsesLeft} />
         )}
       </AnimatePresence>
     </div>
