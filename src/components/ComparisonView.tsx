@@ -64,7 +64,7 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ original, proces
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 sm:px-0">
         <button
           onClick={() => handleDownload(processed, `vision-asphalte-${lang}.png`)}
-          className="flex items-center justify-center space-x-3 bg-emerald-600 text-white py-4 px-10 rounded-2xl font-bold hover:bg-emerald-500 transition-all shadow-[0_15px_30px_rgba(16,185,129,0.45)] active:scale-95 w-full sm:w-auto cursor-pointer"
+          className="flex items-center justify-center space-x-3 bg-emerald-600 hover:bg-emerald-500 text-white py-4 px-10 rounded-2xl font-bold transition-all shadow-[0_0_35px_rgba(16,185,129,0.45)] hover:shadow-[0_0_45px_rgba(16,185,129,0.65)] active:scale-95 w-full sm:w-auto cursor-pointer border border-emerald-400/20"
         >
           <Download className="w-5 h-5" />
           <span>{lang === 'fr' ? 'Enregistrer la simulation' : 'Save simulation'}</span>
@@ -72,10 +72,10 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ original, proces
       </div>
 
       {/* Block 3: New Simulation */}
-      <div className="flex justify-center pt-6 border-t border-white/10 px-4 sm:px-0">
+      <div className="flex justify-center pt-6 border-t border-slate-900 px-4 sm:px-0">
         <button
           onClick={onReset}
-          className="flex items-center justify-center space-x-3 bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-white py-4 px-10 rounded-2xl font-bold transition-all active:scale-95 w-full sm:w-auto cursor-pointer"
+          className="flex items-center justify-center space-x-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white py-4 px-10 rounded-2xl font-bold transition-all active:scale-95 w-full sm:w-auto cursor-pointer"
         >
           <RefreshCw className="w-5 h-5 text-emerald-400" />
           <span>{lang === 'fr' ? 'Nouvelle Simulation' : 'New Simulation'}</span>
