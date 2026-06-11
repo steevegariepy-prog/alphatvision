@@ -410,7 +410,7 @@ export default function App() {
             {/* Language switcher */}
             <button 
               onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-              className="flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-slate-250 px-3 py-2 rounded-xl sm:rounded-2xl border border-slate-800 transition-all text-xs sm:text-sm font-semibold cursor-pointer active:scale-95"
+              className="flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 px-3 py-2 rounded-xl sm:rounded-2xl border border-slate-800 transition-all text-xs sm:text-sm font-semibold cursor-pointer active:scale-95"
             >
               <Languages className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
               <span>{t.langSwitch}</span>
