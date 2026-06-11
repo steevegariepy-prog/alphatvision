@@ -11,8 +11,7 @@ import { ComparisonView } from './components/ComparisonView';
 import { LegalModal, LegalDocumentType } from './components/LegalModal';
 import { DrivewayCalculator } from './components/DrivewayCalculator';
 import { applyAsphaltSealant } from './services/gemini';
-// @ts-ignore
-import backgroundImage from './assets/images/luxury_sealed_driveway_1781191154415.jpg';
+const backgroundImage = '/luxury_sealed_driveway.jpg';
 
 const MAX_FREE_USES = 3;
 const STORAGE_KEY = 'av_uses';
