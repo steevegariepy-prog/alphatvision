@@ -14,6 +14,7 @@ import { applyAsphaltSealant } from './services/gemini';
 
 const MAX_FREE_USES = 3;
 const STORAGE_KEY = 'av_uses';
+const STORAGE_KEY_PURCHASED = 'av_purchased_uses';
 
 function getUseCount(): number {
   return parseInt(localStorage.getItem(STORAGE_KEY) || '0');
@@ -23,11 +24,18 @@ function incrementUseCount(): number {
   localStorage.setItem(STORAGE_KEY, String(next));
   return next;
 }
+function getPurchasedUses(): number {
+  return parseInt(localStorage.getItem(STORAGE_KEY_PURCHASED) || '0');
+}
+function addPurchasedUses(amount: number) {
+  const next = getPurchasedUses() + amount;
+  localStorage.setItem(STORAGE_KEY_PURCHASED, String(next));
+}
 function canUse(): boolean {
-  return getUseCount() < MAX_FREE_USES;
+  return getUseCount() < MAX_FREE_USES + getPurchasedUses();
 }
 function remainingUses(): number {
-  return Math.max(0, MAX_FREE_USES - getUseCount());
+  return Math.max(0, (MAX_FREE_USES + getPurchasedUses()) - getUseCount());
 }
 
 const translations = {
@@ -75,12 +83,12 @@ const translations = {
     statusAfter: "Simulation Pro",
     freeRemaining: (n: number) => `${n} essai${n > 1 ? 's' : ''} gratuit${n > 1 ? 's' : ''} restant${n > 1 ? 's' : ''}`,
     paywallTitle: "Vous avez utilisé vos 3 essais gratuits",
-    paywallSubtitle: "Passez à la version Pro pour des simulations illimitées.",
-    paywallFeature1: "Simulations illimitées",
-    paywallFeature2: "Résultats haute résolution",
-    paywallFeature3: "Support prioritaire",
-    paywallCta: "Obtenir la version Pro",
-    paywallPrice: "9,99$ / mois",
+    paywallSubtitle: "Achetez un pack de 150 visualisations pour continuer.",
+    paywallFeature1: "150 simulations de haute qualité",
+    paywallFeature2: "Crédits cumulables & n'expirent jamais",
+    paywallFeature3: "Achetez autant de packs que nécessaire",
+    paywallCta: "Acheter 150 simulations",
+    paywallPrice: "9,99$",
     paywallClose: "Fermer",
     uploaderTitle: "Prêt pour la transformation ?",
     uploaderSubtitle: "Glissez votre photo ici ou choisissez une option ci-dessous.",
@@ -134,12 +142,12 @@ const translations = {
     statusAfter: "Pro Simulation",
     freeRemaining: (n: number) => `${n} free trial${n > 1 ? 's' : ''} remaining`,
     paywallTitle: "You've used your 3 free trials",
-    paywallSubtitle: "Upgrade to Pro for unlimited simulations.",
-    paywallFeature1: "Unlimited simulations",
-    paywallFeature2: "High-resolution results",
-    paywallFeature3: "Priority support",
-    paywallCta: "Get Pro Version",
-    paywallPrice: "$9.99 / month",
+    paywallSubtitle: "Buy a pack of 150 visualizations to continue.",
+    paywallFeature1: "150 high-quality simulations",
+    paywallFeature2: "Credits stack and never expire",
+    paywallFeature3: "Buy as many packs as you need",
+    paywallCta: "Buy 150 simulations",
+    paywallPrice: "$9.99",
     paywallClose: "Close",
     uploaderTitle: "Ready for transformation?",
     uploaderSubtitle: "Drag your photo here or choose an option below.",
@@ -206,7 +214,7 @@ function PaywallModal({ t, onClose }: { t: typeof translations['fr'], onClose: (
 
           <div className="space-y-3">
             <button
-              onClick={() => window.open('https://buy.stripe.com/4gM5kCcpo93k4gJbuX28801', '_blank')}
+              onClick={() => window.open('https://buy.stripe.com/5kQaEW0GG0wO14xcz128802', '_blank')}
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-2"
             >
               <Crown className="w-5 h-5" />
@@ -239,15 +247,12 @@ export default function App() {
   const [activeLegalModal, setActiveLegalModal] = useState<LegalDocumentType>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [usesLeft, setUsesLeft] = useState(remainingUses());
-  const [isPremium, setIsPremium] = useState(() => {
-    return localStorage.getItem('av_premium') === 'true';
-  });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success') === 'true') {
-      localStorage.setItem('av_premium', 'true');
-      setIsPremium(true);
+      addPurchasedUses(150);
+      setUsesLeft(remainingUses());
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -267,7 +272,7 @@ export default function App() {
 
   const processImage = useCallback(async (file: File) => {
     // Vérifier les essais disponibles
-    if (!isPremium && !canUse()) {
+    if (!canUse()) {
       setShowPaywall(true);
       return;
     }
@@ -297,11 +302,8 @@ export default function App() {
       setProcessedImages({ matte: matteResult, glossy: glossyResult });
       setProgress(100);
 
-      // Incrémenter seulement si succès et pas premium
-      if (!isPremium) {
-        incrementUseCount();
-        setUsesLeft(remainingUses());
-      }
+      incrementUseCount();
+      setUsesLeft(remainingUses());
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Désolé, une erreur est survenue lors du traitement de l'image. Veuillez réessayer.");
@@ -309,7 +311,7 @@ export default function App() {
       setIsLoading(false);
       clearInterval(interval);
     }
-  }, [loadingMessages.length, isPremium]);
+  }, [loadingMessages.length]);
 
   const handleReset = () => {
     setOriginalImage(null);
@@ -410,51 +412,40 @@ export default function App() {
 
 
               {/* Quota / trial indicator (Talon d'accès) ou Forfait Premium */}
-              {!isPremium ? (usesLeft > 0 && (
+              {usesLeft <= MAX_FREE_USES + getPurchasedUses() && (
                 <div className="flex flex-col items-center justify-center space-y-3 bg-zinc-950/70 border border-white/10 p-5 rounded-[2rem] max-w-sm mx-auto shadow-2xl backdrop-blur-md relative overflow-hidden">
                   <div className="absolute -right-4 -top-4 w-12 h-12 bg-emerald-500/20 rounded-full blur-xl pointer-events-none" />
                   <div className="flex items-center space-x-2 text-xs font-semibold text-emerald-400">
                     <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse" />
-                    <span className="uppercase tracking-widest">{lang === 'fr' ? 'Compteur d\'Essais' : 'Trial Counter'}</span>
+                    <span className="uppercase tracking-widest">{lang === 'fr' ? 'Crédits Restants' : 'Remaining Credits'}</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    {[1, 2, 3].map((step) => {
-                      const isActive = step <= usesLeft;
-                      return (
-                        <div
-                          key={step}
-                          className={`w-12 h-3.5 rounded-full transition-all duration-500 ${
-                            isActive 
-                              ? 'bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.7)] scale-110' 
-                              : 'bg-zinc-800 border border-white/5 opacity-40'
-                          }`}
-                        />
-                      );
-                    })}
-                  </div>
-                  <p className="text-white text-sm font-bold font-display text-center">
-                    {t.freeRemaining(usesLeft)} / {MAX_FREE_USES} {lang === 'fr' ? 'gratuit' : 'free'}
+                  
+                  <p className="text-white text-3xl font-black font-display text-center">
+                    {usesLeft}
                   </p>
-                </div>
-              )) : (
-                <div className="flex flex-col items-center justify-center space-y-4 bg-zinc-950/70 border border-emerald-500/30 p-5 rounded-[2rem] max-w-sm mx-auto shadow-2xl backdrop-blur-md relative overflow-hidden">
-                  <div className="absolute -left-4 -bottom-4 w-16 h-16 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none" />
-                  <div className="flex items-center space-x-2">
-                    <Crown className="w-6 h-6 text-emerald-400" />
-                    <h3 className="text-xl font-bold font-display text-white">Forfait Premium</h3>
-                  </div>
-                  <button
-                    onClick={() => window.open('https://billing.stripe.com/p/login/cNi00idtsdjA7sVaqT28800', '_blank')}
-                    className="border border-white/10 hover:bg-white/5 text-zinc-300 px-6 py-2 rounded-xl text-sm font-medium transition-colors"
-                  >
-                    Canceller
-                  </button>
+                  
+                  {usesLeft === 0 && (
+                    <button
+                      onClick={() => setShowPaywall(true)}
+                      className="mt-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-xl text-sm font-bold transition-all shadow-lg"
+                    >
+                      {lang === 'fr' ? 'Acheter des simulations' : 'Buy simulations'}
+                    </button>
+                  )}
+                  {getPurchasedUses() > 0 && usesLeft > 0 && (
+                     <button
+                       onClick={() => setShowPaywall(true)}
+                       className="border border-white/10 hover:bg-white/5 text-zinc-300 px-4 py-1.5 rounded-xl text-xs font-medium transition-colors"
+                     >
+                       {lang === 'fr' ? 'Recharger des crédits' : 'Recharge credits'}
+                     </button>
+                  )}
                 </div>
               )}
 
               <div className="relative">
                 <div className="absolute -inset-4 bg-emerald-500/10 blur-3xl rounded-full -z-10" />
-                {!isPremium && usesLeft === 0 ? (
+                {usesLeft === 0 ? (
                   <div
                     onClick={() => setShowPaywall(true)}
                     className="relative cursor-pointer"
@@ -575,7 +566,7 @@ export default function App() {
               <div className="text-center space-y-4">
                 <h2 className="text-4xl font-bold font-display text-white">{t.resultTitle}</h2>
                 <p className="text-zinc-300 text-lg">{t.resultSubtitle}</p>
-                {!isPremium && usesLeft > 0 && (
+                {usesLeft > 0 && (
                   <div className="inline-flex items-center space-x-1.5 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 px-3 py-1.5 rounded-2xl text-xs font-medium">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{t.freeRemaining(usesLeft)}</span>
