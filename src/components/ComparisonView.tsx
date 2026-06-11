@@ -23,11 +23,11 @@ export const ComparisonView: React.FC<ComparisonViewProps> = ({ original, proces
 
   return (
     <div className="w-full max-w-6xl mx-auto p-0 sm:p-4 space-y-10">
-      {/* Block Slider: Interactive comparison with custom taller aspect ratios for mobile & desktop */}
+      {/* Block Slider: Interactive comparison with landscape wide aspect ratio and edge-to-edge mobile format */}
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.4)] border-[6px] sm:border-[12px] border-white/95 bg-zinc-950 aspect-[3/4] sm:aspect-[4/3] md:aspect-[16/10] group"
+        className="relative -mx-6 sm:mx-0 rounded-none sm:rounded-[2.5rem] overflow-hidden shadow-[0_30px_100px_rgba(0,0,0,0.4)] border-y-[6px] border-x-0 sm:border-[12px] border-white/95 bg-zinc-950 aspect-[1.4] sm:aspect-[4/3] md:aspect-[16/10] group"
       >
         <ReactCompareSlider
           itemOne={<ReactCompareSliderImage src={original} alt="Avant" className="object-cover w-full h-full" />}
