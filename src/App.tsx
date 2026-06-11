@@ -35,6 +35,7 @@ const translations = {
     appName: "Asphalt",
     appNameSuffix: "Vision",
     designedBy: "conçu par Quantumapp",
+    calculatorTitle: "Calculateur",
     aiPowered: "Propulsé par l'IA",
     heroTitle: "Visualisez votre",
     heroTitleHighlight: "entrée de garage",
@@ -93,6 +94,7 @@ const translations = {
     appName: "Asphalt",
     appNameSuffix: "Vision",
     designedBy: "designed by Quantumapp",
+    calculatorTitle: "Calculator",
     aiPowered: "AI Powered",
     heroTitle: "Visualize your",
     heroTitleHighlight: "driveway",
@@ -329,34 +331,36 @@ export default function App() {
       </div>
       
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-zinc-900/80 backdrop-blur-xl border-b border-white/10 px-6 py-4">
+      <header className="sticky top-0 z-50 bg-zinc-900/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 py-3 sm:py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex flex-col group cursor-pointer items-center" onClick={handleReset}>
+          <div className="flex flex-col group cursor-pointer items-start" onClick={handleReset}>
             <div className="flex items-center space-x-2">
-              <div className="bg-emerald-600 p-2 rounded-xl">
-                <Droplets className="w-6 h-6 text-white" />
+              <div className="bg-emerald-600 p-1.5 sm:p-2 rounded-xl">
+                <Droplets className="w-5.5 h-5.5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <span className="text-xl font-bold font-display tracking-tight uppercase text-white">{t.appName}<span className="text-emerald-400">{t.appNameSuffix}</span></span>
+              <span className="text-lg sm:text-xl font-bold font-display tracking-tight uppercase text-white">{t.appName}<span className="text-emerald-400">{t.appNameSuffix}</span></span>
             </div>
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider mt-1 bg-emerald-400/10 px-2 py-0.5 rounded-md border border-emerald-400/20">
+            <span className="text-[10px] text-zinc-500 font-mono tracking-widest mt-1 ml-1 select-none">
               {t.designedBy}
             </span>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            {/* Single clean Calculator button, fully responsive */}
             <button 
               onClick={() => setIsCalculatorOpen(true)}
-              className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-2xl border border-emerald-500/20 transition-all text-sm font-bold shadow-lg shadow-emerald-950/30 cursor-pointer"
+              className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-xl sm:rounded-2xl border border-emerald-500/20 transition-all text-xs sm:text-sm font-bold shadow-lg shadow-emerald-950/30 cursor-pointer active:scale-95"
             >
-              <Calculator className="w-4 h-4 text-white" />
+              <Calculator className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white shrink-0" />
               <span>{lang === 'fr' ? 'Calculateur' : 'Estimator'}</span>
             </button>
 
+            {/* Language switcher */}
             <button 
               onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-              className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-2xl border border-white/10 transition-all text-sm font-medium cursor-pointer"
+              className="flex items-center space-x-1.5 bg-white/5 hover:bg-white/10 text-white px-3 py-2 rounded-xl sm:rounded-2xl border border-white/10 transition-all text-xs sm:text-sm font-medium cursor-pointer active:scale-95"
             >
-              <Languages className="w-4 h-4 text-emerald-400" />
+              <Languages className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
               <span>{t.langSwitch}</span>
             </button>
           </div>
@@ -638,7 +642,7 @@ export default function App() {
                   </div>
                   <span className="text-xl font-bold font-display tracking-tight uppercase text-white">{t.appName}<span className="text-emerald-400">{t.appNameSuffix}</span></span>
                 </div>
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider mt-2 ml-1 bg-emerald-400/10 px-2 py-0.5 rounded-md border border-emerald-400/20 inline-block w-fit">
+                <span className="text-xs font-bold text-zinc-500 font-mono tracking-widest mt-2 ml-1">
                   {t.designedBy}
                 </span>
               </div>
