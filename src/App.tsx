@@ -15,6 +15,25 @@ import { applyAsphaltSealant } from './services/gemini';
 const MAX_FREE_USES = 3;
 const STORAGE_KEY = 'av_uses';
 const STORAGE_KEY_PURCHASED = 'av_purchased_uses';
+const STRIPE_PROCESSED_SESSIONS_KEY = 'av_processed_sessions';
+
+let hasProcessedSuccessThisMount = false;
+
+function getProcessedSessions(): string[] {
+  try {
+    return JSON.parse(localStorage.getItem(STRIPE_PROCESSED_SESSIONS_KEY) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function markSessionAsProcessed(sessionId: string) {
+  const processed = getProcessedSessions();
+  if (!processed.includes(sessionId)) {
+    processed.push(sessionId);
+    localStorage.setItem(STRIPE_PROCESSED_SESSIONS_KEY, JSON.stringify(processed));
+  }
+}
 
 function getUseCount(): number {
   return parseInt(localStorage.getItem(STORAGE_KEY) || '0');
@@ -83,11 +102,11 @@ const translations = {
     statusAfter: "Simulation Pro",
     freeRemaining: (n: number) => `${n} essai${n > 1 ? 's' : ''} gratuit${n > 1 ? 's' : ''} restant${n > 1 ? 's' : ''}`,
     paywallTitle: "Vous avez utilisé vos 3 essais gratuits",
-    paywallSubtitle: "Achetez un pack de 150 visualisations pour continuer.",
-    paywallFeature1: "150 simulations de haute qualité",
+    paywallSubtitle: "Achetez un pack de 150 visualisations pour 9,99$ pour continuer.",
+    paywallFeature1: "150 simulations de haute qualité pour 9,99$",
     paywallFeature2: "Crédits cumulables & n'expirent jamais",
     paywallFeature3: "Achetez autant de packs que nécessaire",
-    paywallCta: "Acheter 150 simulations",
+    paywallCta: "Acheter 150 simulations (9,99$)",
     paywallPrice: "9,99$",
     paywallClose: "Fermer",
     uploaderTitle: "Prêt pour la transformation ?",
@@ -142,11 +161,11 @@ const translations = {
     statusAfter: "Pro Simulation",
     freeRemaining: (n: number) => `${n} free trial${n > 1 ? 's' : ''} remaining`,
     paywallTitle: "You've used your 3 free trials",
-    paywallSubtitle: "Buy a pack of 150 visualizations to continue.",
-    paywallFeature1: "150 high-quality simulations",
+    paywallSubtitle: "Buy a pack of 150 visualizations for $9.99 to continue.",
+    paywallFeature1: "150 high-quality simulations for $9.99",
     paywallFeature2: "Credits stack and never expire",
     paywallFeature3: "Buy as many packs as you need",
-    paywallCta: "Buy 150 simulations",
+    paywallCta: "Buy 150 simulations ($9.99)",
     paywallPrice: "$9.99",
     paywallClose: "Close",
     uploaderTitle: "Ready for transformation?",
@@ -218,7 +237,7 @@ function PaywallModal({ t, onClose }: { t: typeof translations['fr'], onClose: (
               className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-emerald-900/40 flex items-center justify-center space-x-2"
             >
               <Crown className="w-5 h-5" />
-              <span>{t.paywallCta} — {t.paywallPrice}</span>
+              <span>{t.paywallCta}</span>
             </button>
             <button
               onClick={onClose}
@@ -251,8 +270,22 @@ export default function App() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success') === 'true') {
-      addPurchasedUses(150);
-      setUsesLeft(remainingUses());
+      const sessionId = urlParams.get('session_id');
+      if (sessionId) {
+        const processed = getProcessedSessions();
+        if (!processed.includes(sessionId)) {
+          markSessionAsProcessed(sessionId);
+          addPurchasedUses(150);
+          setUsesLeft(remainingUses());
+        }
+      } else {
+        // Fallback for when session_id is not passed by Stripe configuration
+        if (!hasProcessedSuccessThisMount) {
+          hasProcessedSuccessThisMount = true;
+          addPurchasedUses(150);
+          setUsesLeft(remainingUses());
+        }
+      }
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
