@@ -5,10 +5,11 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, X, Lock, Crown } from 'lucide-react';
+import { Droplets, AlertCircle, Loader2, CheckCircle2, ShieldCheck, Zap, Sparkles, Languages, Eye, X, Lock, Crown, Calculator } from 'lucide-react';
 import { ImageUploader } from './components/ImageUploader';
 import { ComparisonView } from './components/ComparisonView';
 import { LegalModal, LegalDocumentType } from './components/LegalModal';
+import { DrivewayCalculator } from './components/DrivewayCalculator';
 import { applyAsphaltSealant } from './services/gemini';
 
 const MAX_FREE_USES = 3;
@@ -226,6 +227,7 @@ export default function App() {
   const [lang, setLang] = useState<'fr' | 'en'>('fr');
   const t = translations[lang];
   
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [processedImages, setProcessedImages] = useState<{ matte: string; glossy: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -343,8 +345,16 @@ export default function App() {
 
           <div className="flex items-center space-x-3">
             <button 
+              onClick={() => setIsCalculatorOpen(true)}
+              className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-2xl border border-emerald-500/20 transition-all text-sm font-bold shadow-lg shadow-emerald-950/30 cursor-pointer"
+            >
+              <Calculator className="w-4 h-4 text-white" />
+              <span>{lang === 'fr' ? 'Calculateur' : 'Estimator'}</span>
+            </button>
+
+            <button 
               onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
-              className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-2xl border border-white/10 transition-all text-sm font-medium"
+              className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-2xl border border-white/10 transition-all text-sm font-medium cursor-pointer"
             >
               <Languages className="w-4 h-4 text-emerald-400" />
               <span>{t.langSwitch}</span>
@@ -656,6 +666,12 @@ export default function App() {
         type={activeLegalModal} 
         onClose={() => setActiveLegalModal(null)} 
         lang={lang} 
+      />
+
+      <DrivewayCalculator
+        isOpen={isCalculatorOpen}
+        onClose={() => setIsCalculatorOpen(false)}
+        lang={lang}
       />
 
       {/* Paywall Modal */}
