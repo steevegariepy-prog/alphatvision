@@ -62,7 +62,7 @@ async function startServer() {
         "relation": ["delegate_permission/common.handle_all_urls"],
         "target": {
           "namespace": "android_app",
-          "package_name": "com.asphaltvision.twa",
+          "package_name": "com.asphaltvision.twa", // À ajuster selon votre package Android
           "sha256_cert_fingerprints": [
             "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
           ]
@@ -74,6 +74,7 @@ async function startServer() {
   // 4. Fichiers statiques et Icônes
   app.use(express.static(path.join(currentDirname, "public")));
 
+  // 3. Icônes Locales (Indispensable pour le packaging Android)
   app.get("/icon-192.png", async (req, res) => {
     try {
       res.sendFile(path.join(currentDirname, "public", "icon-192.png"));
@@ -100,18 +101,19 @@ async function startServer() {
   });
 
   app.use(express.json({ limit: '50mb' }));
-
-  // Server-side processing
+  
+  // Server-side processing to bypass Wix/Browser restrictions
   app.post("/api/process-image", async (req, res) => {
     const { image, mimeType, finishOption } = req.body;
     
+    // Priority: 1. GEMINI_API_KEY, 2. CLE_ASPHALTE, 3. API_KEY
     const apiKey = process.env.GEMINI_API_KEY || 
                    process.env.CLE_ASPHALTE || 
                    process.env.API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({ 
-        error: "CONFIGURATION REQUISE : Clé API Gemini manquante."
+        error: "CONFIGURATION REQUISE : Clé API Gemini manquante. Veuillez configurer votre clé 'GEMINI_API_KEY' via le menu Paramètres (Settings) de Google AI Studio."
       });
     }
 
@@ -130,7 +132,7 @@ async function startServer() {
         }
       });
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
+        model: 'gemini-2.5-flash-image', // Default image model
         contents: {
           parts: [
             {
@@ -144,6 +146,14 @@ async function startServer() {
             },
           ],
         },
+        config: {
+          safetySettings: [
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+          ] as any
+        }
       });
 
       const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
@@ -160,20 +170,6 @@ async function startServer() {
 
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
-  });
-
-  // Google Play Billing - validation d'achat
-  app.post("/api/validate-google-purchase", async (req, res) => {
-    const { purchaseToken } = req.body;
-    
-    if (!purchaseToken) {
-      return res.status(400).json({ error: "Token manquant" });
-    }
-
-    // Phase 1 : validation simple (Phase 2 = Google Play Developer API)
-    console.log("Google Purchase Token reçu:", purchaseToken);
-    
-    res.json({ success: true, credits: 150 });
   });
 
   // Support explicit privacy policy page requests for Google Play Store review
